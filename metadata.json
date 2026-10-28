@@ -1,0 +1,6 @@
+{
+  "name": "Once Upon a time... - 해리포터 자캐 커뮤니티",
+  "description": "해리포터 위저딩 월드 기반 자캐 커뮤니티 'Once Upon a time...' 캐릭터 도감 및 프로필 아카이브",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

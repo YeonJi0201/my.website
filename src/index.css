@@ -1,0 +1,162 @@
+@import "tailwindcss";
+
+@layer base {
+  :root {
+    --font-cinzel: 'Cinzel', serif;
+    --font-garamond: 'Cormorant Garamond', 'Noto Serif KR', serif;
+    --font-korean: 'Noto Serif KR', serif;
+  }
+
+  body {
+    font-family: var(--font-korean);
+    background-color: #07090e;
+    color: #e6e2d8;
+  }
+
+  h1, h2, h3, .font-cinzel {
+    font-family: var(--font-cinzel);
+  }
+
+  .font-garamond {
+    font-family: var(--font-garamond);
+  }
+}
+
+/* Custom magical keyframes & utilities */
+@keyframes magicalGlow {
+  0%, 100% {
+    filter: drop-shadow(0 0 15px rgba(212, 163, 62, 0.4)) drop-shadow(0 0 35px rgba(184, 134, 11, 0.2));
+  }
+  50% {
+    filter: drop-shadow(0 0 28px rgba(245, 208, 100, 0.8)) drop-shadow(0 0 55px rgba(212, 163, 62, 0.45));
+  }
+}
+
+@keyframes runeRotate {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes floatGentle {
+  0%, 100% {
+    transform: translateY(0px);
+  }
+  50% {
+    transform: translateY(-8px);
+  }
+}
+
+@keyframes shimmerGold {
+  0% {
+    background-position: -200% center;
+  }
+  100% {
+    background-position: 200% center;
+  }
+}
+
+.animate-magical-glow {
+  animation: magicalGlow 4s ease-in-out infinite;
+}
+
+.animate-rune-slow {
+  animation: runeRotate 60s linear infinite;
+}
+
+.animate-float {
+  animation: floatGentle 5s ease-in-out infinite;
+}
+
+.gold-gradient-text {
+  background: linear-gradient(135deg, #fff0c7 0%, #d4a33e 40%, #f7df8f 60%, #996e1b 100%);
+  background-size: 200% auto;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  animation: shimmerGold 8s linear infinite;
+}
+
+.parchment-border {
+  border: 1px solid rgba(212, 163, 62, 0.25);
+  box-shadow: 0 4px 30px rgba(0, 0, 0, 0.7), inset 0 0 20px rgba(212, 163, 62, 0.05);
+}
+
+.custom-scrollbar::-webkit-scrollbar {
+  width: 6px;
+}
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: rgba(10, 14, 23, 0.8);
+}
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background: rgba(212, 163, 62, 0.3);
+  border-radius: 3px;
+}
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: rgba(212, 163, 62, 0.6);
+}
+/* A midnight chronicle: aged brass, ink, velvet and candlelight. */
+html { scroll-behavior: smooth; scroll-padding-top: 90px; }
+body { margin: 0; }
+button, a, input, select { -webkit-tap-highlight-color: transparent; }
+button:focus-visible, a:focus-visible { outline: 1px solid #d1b980; outline-offset: 6px; }
+header { background: #0a1115ed !important; border-bottom-color: #a38a5040 !important; }
+header > div { height: 80px !important; }
+header svg { stroke-width: 1.25; }
+header button { border-radius: 0 !important; }
+header button:last-child { box-shadow: none; }
+.gold-gradient-text { background: none; -webkit-text-fill-color: #d6c193; color: #d6c193; animation: none; }
+.wizard-home { color: #e0d7c5; background: #0a1114; }
+.castle-stage { position: relative; min-height: 950px; overflow: hidden; padding: 48px 6vw 35px; }
+.castle-backdrop { position: absolute; inset: -100px 0 0; width: 100%; height: calc(100% + 100px); object-fit: cover; object-position: 50% 40%; filter: saturate(.55) brightness(.55); }
+.castle-shade { position: absolute; inset: 0; background: linear-gradient(180deg,#0a11154d, #07101430 35%,#0a1114 100%),linear-gradient(90deg,#071014d9,transparent 38%,transparent 62%,#071014d9); }
+.stage-border { position: absolute; inset: 20px 25px 25px; border: 1px solid #c4a76a26; pointer-events: none; }
+.stage-border::before,.stage-border::after { content: '✧'; position: absolute; top: -13px; color: #b6a074; font-size: 18px; background: #0b151b; padding: 0 8px; }
+.stage-border::before { left: 15px; }.stage-border::after { right: 15px; }
+.small-caps { font-family: var(--font-cinzel); font-size: 10px; letter-spacing: .25em; color: #b4a07b; }
+.chapter-heading { position: relative; text-align: center; z-index: 2; }
+.chapter-heading h1 { font-size: clamp(48px,7vw,92px); font-weight: 400; letter-spacing: .22em; padding-left: .22em; line-height: 1.3; color: #e6d5ad; text-shadow: 0 3px 30px #000; margin: 9px 0; }
+.chapter-heading > p { font-size: 12px; letter-spacing: .25em; color: #c0b7a3; }
+.portrait-composition { position: relative; display: grid; grid-template-columns: 1fr minmax(260px,360px) 1fr; align-items: center; gap: clamp(25px,5vw,90px); max-width: 1250px; margin: 45px auto 0; }
+.center-portrait { position: relative; width: 100%; max-width: 360px; justify-self: center; }
+.portrait-halo { position: absolute; inset: -28px -30px 50px; border: 1px solid #bda46b30; border-radius: 50% 50% 1px 1px; box-shadow: 0 0 90px #b49b5c0d; }
+.portrait-ornament { position: absolute; top: -49px; left: 50%; transform: translateX(-50%); color: #cebb87; font-size: 30px; z-index: 3; }
+.enchanted-frame { position: relative; display: block; width: 100%; aspect-ratio: 3/4; border: 1px solid #b29b68; outline: 1px solid #b29b684d; outline-offset: 7px; border-radius: 48% 48% 2px 2px; overflow: hidden; background: #10171a; cursor: pointer; box-shadow: 0 25px 70px #0009; }
+.enchanted-frame img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: center; filter: saturate(.7); transition: filter .6s; }
+.enchanted-frame:hover img { filter: saturate(1); }
+.portrait-vignette { position: absolute; inset: 0; background: linear-gradient(0deg,#070d12e6,transparent 35%,transparent 75%,#0004); box-shadow: inset 0 0 35px #0005; }
+.portrait-house { position: absolute; bottom: 48px; left: 0; right: 0; text-align: center; font-family: var(--font-cinzel); font-size: 12px; letter-spacing: .2em; color: #d9c69b; }
+.portrait-invitation { position: absolute; bottom: 22px; left: 0; right: 0; display: flex; justify-content: center; gap: 8px; align-items: center; font-size: 10px; color: #c6c3b6; }
+.portrait-caption { display: grid; grid-template-columns: 30px 1fr 30px; align-items: center; margin-top: 25px; text-align: center; min-height: 58px; }
+.portrait-caption button { cursor: pointer; color: #a89368; padding: 6px; transition: color .3s; }.portrait-caption button:hover { color: #f4e0ae; }
+.portrait-caption h2 { font-family: var(--font-korean); font-weight: 400; font-size: 20px; letter-spacing: .08em; }
+.portrait-caption p { font-family: var(--font-garamond); font-style: italic; color: #a59a86; font-size: 16px; margin-top: 5px; }
+.stage-note h2 { font-family: var(--font-korean); font-weight: 400; font-size: clamp(21px,2.2vw,31px); line-height: 1.8; margin: 22px 0; letter-spacing: -.04em; }
+.stage-note p { font-size: 12px; line-height: 2.2; color: #b0b0a5; }
+.ink-link { display: flex; align-items: center; gap: 18px; border-bottom: 1px solid #b4a07b55; padding: 14px 0; margin-top: 26px; color: #d6c193; font-size: 11px; cursor: pointer; transition: gap .35s,color .35s; }.ink-link:hover { gap: 28px; color: #f3e4c4; }
+.note-right { padding-left: 10px; }.note-rule { display: block; height: 1px; width: 35px; background: #b4a07b77; margin: 24px 0; }.stage-note .character-quote { font-size: 15px; line-height: 2.1; margin-bottom: 24px; color: #d5cbb6; }
+.scroll-invitation { position: relative; display: flex; flex-direction: column; align-items: center; gap: 14px; margin-top: 48px; font-size: 10px; letter-spacing: .13em; color: #a9a18d; }.scroll-invitation svg { animation: floatGentle 3s ease-in-out infinite; }
+.house-chapter { position: relative; text-align: center; padding: 80px 6vw 100px; background: radial-gradient(ellipse at 50% 0,#25322f44,transparent 65%); }
+.house-chapter h2 { font-family: var(--font-korean); font-size: clamp(23px,3vw,34px); font-weight: 400; margin: 20px 0 15px; }.house-chapter > div > p { font-size: 12px; color: #96998f; }
+.house-banners { display: grid; grid-template-columns: repeat(4,1fr); max-width: 1100px; margin: 50px auto 0; gap: 24px; }
+.house-banner { position: relative; padding: 25px 12px 35px; border: 1px solid #bba57340; background: linear-gradient(0deg,#10181a,#1e2521); cursor: pointer; transition: border-color .4s,box-shadow .4s; clip-path: polygon(0 0,100% 0,100% 92%,50% 100%,0 92%); }
+.house-banner:hover { border-color: #c8b27c; box-shadow: inset 0 0 60px #bca16c18; }.banner-gryffindor { background: linear-gradient(#38232199,#12191a); }.banner-slytherin { background: linear-gradient(#193c3099,#12191a); }.banner-ravenclaw { background: linear-gradient(#20354a99,#12191a); }.banner-hufflepuff { background: linear-gradient(#463a2299,#12191a); }
+.banner-number { display: block; font-family: var(--font-garamond); font-size: 13px; color: #9b927b; }.heraldic-letter { display: grid; place-items: center; margin: 22px auto; width: 75px; height: 90px; border: 1px solid #bda16c66; border-radius: 45% 45% 50% 50%; font-family: var(--font-cinzel); font-size: 45px; color: #c9b482; }.house-banner h3 { font-weight: 400; font-size: 19px; margin-bottom: 7px; }.house-banner > span:not(.heraldic-letter):not(.banner-number) { font-size: 11px; color: #b5af9e; }.house-banner p { font-size: 10px; color: #9e9b8d; margin: 22px 0; }.house-banner > svg { margin: auto; color: #c9b482; }
+.archive-footer { border-top: 1px solid #b4a07b22; text-align: center; padding: 35px 20px; }.archive-footer p { font-size: 12px; color: #aaa390; margin: 14px; }.archive-footer > span:last-child { font-size: 9px; color: #686f68; letter-spacing: .1em; }
+.drifting-mist { position: absolute; inset: 30% -30% -20%; background: radial-gradient(ellipse at 40% 60%,#9ab7ac12,transparent 45%), radial-gradient(ellipse at 70% 75%,#b3cac512,transparent 40%); animation: mistDrift 22s ease-in-out infinite alternate; pointer-events: none; }
+@keyframes mistDrift { from { transform: translateX(-6%); } to { transform: translateX(8%); } }
+.floating-candle { position: absolute; width: 6px; height: 37px; background: linear-gradient(90deg,#64543c,#d6c8a0,#837459); box-shadow: 0 0 25px #eab75d15; animation: candleFloat 7s ease-in-out infinite; opacity: .75; }.floating-candle i { position: absolute; top: -15px; left: 1px; width: 4px; height: 12px; border-radius: 70% 40% 60% 40%; background: #fff0bd; box-shadow: 0 0 8px #ffd080,0 0 25px #e6a743aa; animation: flame 2s ease-in-out infinite alternate; }.candle-0 { left: 8%; top: 150px; }.candle-1 { left: 25%; top: 270px; animation-delay: -3s; transform: scale(.65); }.candle-2 { right: 12%; top: 160px; animation-delay: -1s; }.candle-3 { right: 27%; top: 320px; animation-delay: -4s; }.candle-4 { left: 15%; top: 650px; animation-delay: -2s; }.candle-5 { right: 8%; top: 650px; animation-delay: -5s; }
+@keyframes candleFloat { 0%,100% { translate: 0 0; } 50% { translate: 5px -15px; } }@keyframes flame { from { opacity: .7; transform: scale(.85) rotate(-5deg); } to { opacity: 1; transform: scale(1.1) rotate(5deg); } }
+/* Portraits remain the visual axis in the detailed archive, too. */
+.character-profile { background: radial-gradient(ellipse at 50% 25%,#71837115,transparent 55%); }
+.profile-layout { display: flex; flex-direction: column; align-items: center; }
+.profile-visual { width: min(100%,480px); }
+.profile-details { width: min(100%,850px); }
+.profile-visual > div:first-child { border-radius: 48% 48% 2px 2px; padding: 9px; background: #151b18; }
+.profile-visual > div:first-child > div.relative.aspect-\[3\/4\] { border-radius: 48% 48% 0 0; }
+.profile-details > div { border-radius: 1px; background-color: #101819; box-shadow: none; }
+@media(max-width:1000px) { .portrait-composition { gap: 30px; grid-template-columns: 1fr 310px 1fr; }.stage-note h2 { font-size: 22px; }.stage-note .small-caps { font-size: 8px; letter-spacing: .14em; }.stage-note p { font-size: 11px; }.house-banners { gap: 14px; } }
+@media(max-width:760px) { header > div { height: auto !important; min-height: 72px; flex-wrap: wrap; gap: 10px; padding-top: 12px; padding-bottom: 12px; } header nav { order: 3; width: 100%; justify-content: center; } header nav button { font-size: 11px; } header nav button:last-child { display: flex; } header nav svg { display: none; }.castle-stage { padding: 40px 24px 30px; min-height: 0; }.chapter-heading h1 { font-size: 57px; }.chapter-heading > p { font-size: 10px; }.portrait-composition { display: flex; flex-direction: column; margin-top: 55px; gap: 30px; }.center-portrait { width: min(75vw,330px); order: -1; }.stage-note { text-align: center; padding: 0; width: min(100%,350px); }.note-left { display: none; }.note-right > .small-caps:first-child,.note-rule { display: none; }.stage-note .character-quote { font-size: 12px; margin: 0 0 15px; }.ink-link { justify-content: center; margin-top: 14px; }.scroll-invitation { margin: 28px 0 10px; }.stage-border { inset: 12px; }.house-chapter { padding: 65px 24px; }.house-banners { grid-template-columns: repeat(2,1fr); gap: 16px; }.house-banner h3 { font-size: 16px; }.candle-1,.candle-3 { display: none; } }
+@media(prefers-reduced-motion:reduce) { html { scroll-behavior: auto; } *,*::before,*::after { animation: none !important; transition-duration: 0.01ms !important; } }

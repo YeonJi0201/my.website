@@ -1,0 +1,46 @@
+﻿/* Four heraldic palettes, shared across the directory, banners and chronicle. */
+[data-house="gryffindor"] { --house-rgb: 138,34,39; --house-metal: #d3ad67; --house-ink: #351317; --house-text: #e3c997; }
+[data-house="slytherin"] { --house-rgb: 28,100,73; --house-metal: #b7c6bd; --house-ink: #10261f; --house-text: #c4d6ca; }
+[data-house="ravenclaw"] { --house-rgb: 39,69,122; --house-metal: #bf916d; --house-ink: #121d36; --house-text: #d4c2ac; }
+[data-house="hufflepuff"] { --house-rgb: 162,119,34; --house-metal: #d3b65f; --house-ink: #302814; --house-text: #e0cf99; }
+.house-emblem { display: block; width: 76px; height: 89px; flex-shrink: 0; color: var(--house-metal,#c9b482); }
+.banner-emblem { width: 92px; height: 107px; margin: 23px auto; }
+.house-banner[data-house] { background: repeating-linear-gradient(90deg,#0000 0 2px,#00000016 2px 3px),linear-gradient(180deg,rgba(var(--house-rgb),.5),#0c1215 93%); border-color: var(--house-metal); }
+.house-banner[data-house]:hover { box-shadow: inset 0 0 60px rgba(var(--house-rgb),.4); }
+.character-chronicle[data-house] { background: linear-gradient(180deg,var(--house-ink),#0a1114 1100px); }
+.character-chronicle .castle-shade { background: linear-gradient(180deg,rgba(var(--house-rgb),.24),#07101440 42%,#0a1114 100%),linear-gradient(90deg,var(--house-ink),transparent 36%,transparent 64%,var(--house-ink)); }
+.character-chronicle .castle-backdrop { filter: saturate(.4) brightness(.48); }
+.character-chronicle .stone-tracery { color: var(--house-metal); opacity: .35; }
+.character-chronicle .stage-border { border-color: rgba(var(--house-rgb),.6); }
+.character-chronicle .profile-toolbar { border-color: var(--house-metal); }
+.character-chronicle .small-caps,.character-chronicle .identity-english,.character-chronicle .personality-keywords,.character-chronicle .notes-columns h3 { color: var(--house-metal); }
+.character-chronicle .identity-rule { background: var(--house-metal); }
+.character-chronicle .profile-personality blockquote { border-color: var(--house-metal); color: var(--house-text); }
+.profile-house-heading { display: flex; gap: 18px; align-items: center; }
+.profile-house-heading .house-emblem { width: 62px; height: 74px; }
+.profile-house-heading .small-caps { line-height: 2.3; }
+.profile-stage { padding-left: 4vw; padding-right: 4vw; min-height: 980px; }
+.profile-composition { grid-template-columns: minmax(190px,1fr) minmax(360px,560px) minmax(190px,1fr); gap: clamp(24px,3vw,48px); max-width: 1500px; margin-top: 35px; }
+.profile-composition .profile-center { width: 100%; max-width: 560px; isolation: isolate; }
+.profile-center .enchanted-frame { aspect-ratio: 4/5; overflow: hidden; }
+.profile-center .portrait-halo { inset: 0 -18% 0; background: radial-gradient(ellipse,rgba(var(--house-rgb),.4),transparent 68%); }
+.profile-crest-watermark { position: absolute; z-index: -1; width: 85%; height: 100%; top: -10%; left: 7.5%; opacity: .12; transform: scale(1.3); pointer-events: none; }
+.character-portrait { position: relative; display: block; width: 100%; height: 100%; overflow: hidden; }
+.character-portrait > img { position: absolute; max-width: none; max-height: none; margin: 0; object-fit: fill; transition: none; transform: none; mask-image: none; -webkit-mask-image: none; }
+.profile-center .character-portrait { mask-image: linear-gradient(90deg,transparent,#000 8%,#000 92%,transparent),linear-gradient(180deg,#000 75%,transparent 100%); mask-composite: intersect; -webkit-mask-image: linear-gradient(90deg,transparent,#000 8%,#000 92%,transparent),linear-gradient(180deg,#000 75%,transparent 100%); -webkit-mask-composite: source-in; }
+.profile-center .character-portrait > img { mask-image: none; -webkit-mask-image: none; filter: saturate(.88); }
+.profile-center .portrait-invitation { bottom: 10px; z-index: 2; }
+.house-directory[data-house]:not([data-house="all"]) { background: radial-gradient(ellipse at 90% 0,rgba(var(--house-rgb),.3),transparent 52%); }
+.directory-heading { position: relative; min-height: 135px; padding-right: 140px; }
+.directory-crest { position: absolute; right: 12px; top: 0; width: 105px; height: 123px; }
+.house-directory[data-house]:not([data-house="all"]) .directory-heading h2 { color: var(--house-text); }
+.house-student-card[data-house] { border-radius: 2px; border-color: var(--house-metal) !important; background: linear-gradient(180deg,var(--house-ink),#0a1016); }
+.house-student-card .character-portrait { aspect-ratio: 4/5; }
+.house-student-card .character-portrait img { mask-image: none; -webkit-mask-image: none; }
+.house-student-card [class*="top-3"][class*="right-3"] { display: flex; align-items: center; gap: 7px; border-radius: 0; }
+.house-student-card .house-emblem { width: 22px; height: 27px; }
+.crop-controls { width: 100%; max-width: 240px; margin-top: 24px; border-top: 1px solid #a28a5544; padding-top: 12px; color: #b6aa91; }
+.crop-controls legend { padding-top: 12px; font-size: 12px; color: #dbc798; }.crop-controls p { font-size: 10px; line-height: 1.8; margin: 8px 0 15px; }
+.crop-controls label { display: block; font-size: 11px; margin: 13px 0; }.crop-controls output { float: right; }.crop-controls input { display: block; width: 100%; margin-top: 9px; accent-color: #ba9d60; }.crop-controls button { font-size: 10px; text-decoration: underline; text-underline-offset: 4px; cursor: pointer; margin-top: 5px; }
+@media (min-width:761px) and (max-width:1100px) { .profile-composition { grid-template-columns: minmax(170px,1fr) minmax(300px,390px) minmax(170px,1fr) !important; gap: 22px; }.profile-identity h1 { font-size: 29px; }.profile-stage { min-height: 850px; }.personality-prose { font-size: 12px; } }
+@media (max-width:760px) { .profile-stage { padding-left: 24px; padding-right: 24px; min-height: 0; }.profile-composition { display: flex; gap: 26px; margin-top: 30px; }.profile-composition .profile-center { width: calc(100% + 28px); max-width: 500px; }.profile-house-heading { justify-content: center; }.profile-house-heading .house-emblem { width: 48px; height: 58px; }.profile-house-heading .small-caps { text-align: left; font-size: 9px; }.profile-identity h1 { margin-top: 16px; }.directory-heading { padding-right: 0; padding-top: 100px; }.directory-crest { width: 72px; height: 84px; top: 0; left: 50%; right: auto; transform: translateX(-50%); }.house-directory[data-house="all"] .directory-heading { padding-top: 0; } }
