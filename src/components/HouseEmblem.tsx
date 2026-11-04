@@ -2,8 +2,9 @@
 
 const animals = { gryffindor: '사자', slytherin: '뱀', ravenclaw: '독수리', hufflepuff: '오소리' };
 /** Original line-work for the four heraldic animals. */
-export function HouseEmblem({ house, className = '' }: { house: HouseType; className?: string }) {
-  return <svg className={`house-emblem ${className}`} viewBox="0 0 120 140" role="img" aria-label={`${animals[house]} 문장`}>
+export function HouseEmblem({ house, className = '', decorative = false }: { house: HouseType; className?: string; decorative?: boolean }) {
+  const label = decorative ? { 'aria-hidden': true } : { role: 'img', 'aria-label': `${animals[house]} 문장` };
+  return <svg className={`house-emblem ${className}`} viewBox="0 0 120 140" {...label}>
     <path className="crest-shield" d="M12 15Q60 2 108 15V72Q108 112 60 133Q12 112 12 72Z" fill="none" stroke="currentColor" />
     <path d="M19 21Q60 10 101 21V71Q101 106 60 125Q19 106 19 71Z" fill="none" stroke="currentColor" opacity=".3" />
     <g fill="none" stroke="currentColor" strokeWidth="2" strokeLinejoin="round" strokeLinecap="round">

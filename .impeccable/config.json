@@ -1,0 +1,17 @@
+{
+  "detector": {
+    "ignoreRules": [],
+    "ignoreFiles": [],
+    "ignoreValues": [
+      {
+        "rule": "gradient-text",
+        "value": "*",
+        "files": [
+          "src/moonlit.css"
+        ],
+        "createdAt": "2026-11-03T07:33:10.947Z",
+        "reason": "Approved comp bd55a219-4479-4035-9a0d-b1a5880922d8.png renders the hero title as metallic gold leaf (light top, deeper gold bottom) and the user asked to match that image exactly; the tonal shift is the comp's material, limited to the two title lines"
+      }
+    ]
+  }
+}

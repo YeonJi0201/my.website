@@ -16,9 +16,9 @@ export function SmokeVeil() {
       const x = 128 + Math.cos(i * 2.399) * (i % 4) * 15;
       const y = 128 + Math.sin(i * 2.399) * (i % 5) * 12;
       const gradient = brush.createRadialGradient(x, y, 0, x, y, 65);
-      gradient.addColorStop(0, 'rgba(153,177,166,.12)');
-      gradient.addColorStop(.4, 'rgba(111,145,137,.065)');
-      gradient.addColorStop(1, 'rgba(81,119,114,0)');
+      gradient.addColorStop(0, 'rgba(178,172,158,.12)');
+      gradient.addColorStop(.4, 'rgba(138,132,120,.065)');
+      gradient.addColorStop(1, 'rgba(104,99,90,0)');
       brush.fillStyle = gradient;
       brush.fillRect(0, 0, 256, 256);
     }
