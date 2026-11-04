@@ -56,7 +56,7 @@ export default function App() {
   return <div className="min-h-screen bg-[#07090e] text-[#e8e4dc] flex flex-col selection:bg-[#d4a33e]/30 selection:text-[#f5d064]">
     <MagicalBackground /><SmokeVeil />
     {isAdminPath ? <Suspense fallback={<p className="archive-loading" role="status">관리자 서고를 여는 중입니다…</p>}><AdminPage characters={characters} onCharactersChange={setCharacters} /></Suspense> : <>
-      <Navbar currentTab={currentView === 'home' ? activeSection : currentView} onNavigate={navigate} soundEnabled={soundEnabled} onToggleSound={handleToggleSound} />
+      <Navbar currentTab={currentView === 'home' ? activeSection : currentView} onNavigate={navigate} soundEnabled={soundEnabled} onToggleSound={handleToggleSound} overlay={currentView === 'home'} />
       {loadError && <div className="archive-error" role="alert">{loadError}<button onClick={() => void refresh()}>다시 불러오기</button></div>}
       <main className="flex-1 relative z-10">
         <AnimatePresence mode="wait">

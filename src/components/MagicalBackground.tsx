@@ -37,6 +37,9 @@ export function MagicalBackground() {
         ctx.fillStyle = `rgba(224,207,158,${alpha})`;
         ctx.beginPath(); ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2); ctx.fill();
       }
+      // The home painting draws its own shooting stars behind the towers; skip the overlay while it is on screen.
+      const liveScene = document.querySelector('.hero-scene[data-mode="live"]');
+      if (elapsed > nextMeteor && liveScene && liveScene.getBoundingClientRect().bottom > height * .3) nextMeteor = elapsed + 2;
       if (elapsed > nextMeteor) {
         const speed = width < 760 ? 300 : 470;
         meteors.push({ x: width * (.3 + Math.random() * .65), y: height * (.06 + Math.random() * .22), age: 0, life: 1.05 + Math.random() * .45, vx: -speed * .8, vy: speed * .65, tail: width < 760 ? 100 : 190 });

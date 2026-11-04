@@ -7,4 +7,5 @@ coverage/
 .env*
 !.env.example
 .admin-access.local.txt
-data/
+/data/
+.impeccable/review/
