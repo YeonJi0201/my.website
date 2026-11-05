@@ -32,7 +32,7 @@ export default function App() {
   const refresh = useCallback(async () => {
     setLoading(true);
     try { setCharacters(await getCharacters()); setLoadError(''); }
-    catch { setLoadError('학생 기록을 불러오지 못했습니다. 잠시 후 다시 시도해주세요.'); }
+    catch (error) { setLoadError(error instanceof Error ? `학생 기록을 불러오지 못했습니다. ${error.message}` : '학생 기록을 불러오지 못했습니다. 잠시 후 다시 시도해주세요.'); }
     finally { setLoading(false); }
   }, []);
   useEffect(() => { void refresh(); }, [refresh]);

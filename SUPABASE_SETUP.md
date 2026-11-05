@@ -1,5 +1,7 @@
 # Supabase 최초 설정
 
+Vercel 공개 명부 배포 안내: [VERCEL_SETUP.md](./VERCEL_SETUP.md).
+
 이미지 저장·운영 안내: [STORAGE_IMAGES.md](./STORAGE_IMAGES.md).
 
 프론트엔드와 관리자 화면은 기존 것을 사용합니다. 브라우저 → Express API → Supabase PostgreSQL 순서로 동작합니다. 관리자 인증은 기존 서버 로그인과 HttpOnly 쿠키를 사용하며, Supabase Auth의 회원가입은 필요하지 않습니다.
