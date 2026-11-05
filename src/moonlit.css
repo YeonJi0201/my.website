@@ -525,7 +525,7 @@ body:has(.roster) .smoke-veil { opacity: .3; }
 .roster-grid [data-house="gryffindor"] { --portrait-wall: #654044; --portrait-shadow: #382329; }
 .roster-grid [data-house="slytherin"] { --portrait-wall: #3f6558; --portrait-shadow: #213e36; }
 .roster-grid [data-house="ravenclaw"] { --portrait-wall: #455b7c; --portrait-shadow: #27354e; }
-.roster-grid [data-house="hufflepuff"] { --portrait-wall: #8a7546; --portrait-shadow: #4d4029; }
+.roster-grid [data-house="hufflepuff"] { --portrait-wall: #a58e48; --portrait-shadow: #685931; }
 .roster-grid .roster-portrait {
   isolation: isolate;
   background:
