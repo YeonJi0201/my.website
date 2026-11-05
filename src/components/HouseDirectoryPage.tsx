@@ -1,3 +1,4 @@
+import { formatSchoolYear } from '../utils/registration-fields';
 import React, { useState } from 'react';
 import { motion, AnimatePresence, useReducedMotion } from 'motion/react';
 import { ArrowLeft, Search } from 'lucide-react';
@@ -37,8 +38,7 @@ export const HouseDirectoryPage: React.FC<HouseDirectoryPageProps> = ({
       query === '' ||
       char.nameKo.toLowerCase().includes(query) ||
       char.nameEn.toLowerCase().includes(query) ||
-      char.personality.some((p) => p.toLowerCase().includes(query)) ||
-      char.specialty.toLowerCase().includes(query);
+      char.personality.some((p) => p.toLowerCase().includes(query));
     return matchesHouse && matchesYear && matchesSearch;
   });
 
@@ -127,7 +127,7 @@ export const HouseDirectoryPage: React.FC<HouseDirectoryPageProps> = ({
                 >
                   <button type="button" className="roster-entry" onClick={() => onSelectCharacter(char.id)}>
                     <span className="roster-portrait"><CharacterPortrait character={char} /></span>
-                    <span className="roster-house"><HouseEmblem house={char.house} decorative />{house.nameKo} · {char.year}학년</span>
+                    <span className="roster-house"><HouseEmblem house={char.house} decorative />{house.nameKo} · {formatSchoolYear(char.year)}</span>
                     <span className="roster-name">{char.nameKo}</span>
                     <span className="roster-name-en" lang="en">{char.nameEn}</span>
                     <span className="roster-traits">{char.personality.slice(0, 3).join(' · ')}</span>

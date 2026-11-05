@@ -12,11 +12,11 @@ const COOKIE = 'once_admin_session';
 export function validCharacter(value: unknown): value is Character {
   if (!value || typeof value !== 'object') return false;
   const c = value as Character;
-  const strings = ['id', 'nameKo', 'nameEn', 'gender', 'birthday', 'patronus', 'boggart', 'appearanceSummary', 'appearanceDetail', 'personalityDetail', 'background', 'quote', 'specialty'] as const;
+  const strings = ['id', 'nameKo', 'nameEn', 'gender', 'birthday', 'appearanceSummary', 'appearanceDetail', 'personalityDetail', 'background', 'quote'] as const;
   if (!strings.every(k => typeof c[k] === 'string' && c[k].length <= 20000)) return false;
   if (!/^[a-zA-Z0-9_-]{1,120}$/.test(c.id) || !c.nameKo.trim() || !c.nameEn.trim()) return false;
   if (!['gryffindor', 'slytherin', 'ravenclaw', 'hufflepuff'].includes(c.house) || !['순수혈통', '혼혈', '머글태생'].includes(c.bloodStatus)) return false;
-  if (!Number.isInteger(c.age) || c.age < 1 || c.age > 200 || !Number.isInteger(c.year) || c.year < 1 || c.year > 7 || !Number.isFinite(c.createdAt)) return false;
+  if (!Number.isInteger(c.age) || c.age < 1 || c.age > 200 || !Number.isInteger(c.year) || c.year < 0 || c.year > 7 || !Number.isFinite(c.createdAt)) return false;
   if (c.height !== undefined && (!Number.isFinite(c.height) || c.height < 1 || c.height > 300)) return false;
   if (c.weight !== undefined && (!Number.isFinite(c.weight) || c.weight < 1 || c.weight > 500)) return false;
   if (![c.personality, c.trivia].every(a => Array.isArray(a) && a.length <= 100 && a.every(s => typeof s === 'string' && s.length <= 5000))) return false;

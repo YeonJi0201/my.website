@@ -1,3 +1,4 @@
+import { formatSchoolYear } from '../utils/registration-fields';
 import { HouseEmblem } from './HouseEmblem';
 import { CharacterPortrait } from './CharacterPortrait';
 import React, { useEffect, useRef, useState } from 'react';
@@ -33,7 +34,7 @@ export const CharacterProfilePage: React.FC<CharacterProfilePageProps> = ({ char
       </div>
       <div className="dossier-composition">
         <motion.aside key={`identity-${character.id}`} className="profile-identity" initial={{ opacity: 0, y: 15 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: reducedMotion ? 0 : .7 }}>
-          <div className="profile-house-heading"><HouseEmblem house={character.house} decorative /><span>{house.nameKo} · {character.year}학년</span></div>
+          <div className="profile-house-heading"><HouseEmblem house={character.house} decorative /><span>{house.nameKo} · {formatSchoolYear(character.year)}</span></div>
           <h1>{character.nameKo}</h1><p className="identity-english">{character.nameEn}</p>
           <div className="identity-rule" />
           <dl className="identity-facts">

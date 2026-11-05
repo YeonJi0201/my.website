@@ -6,6 +6,7 @@ import { X, Upload, Sparkles, Wand2, Shield, Image as ImageIcon } from 'lucide-r
 import { Character, HouseType } from '../types/character';
 import { HOUSES } from '../data/houseData';
 import { sound } from '../utils/audio';
+import { birthdayDays, parseBirthday, WEEKDAYS } from '../utils/registration-fields';
 
 interface CharacterModalProps {
   isOpen: boolean;
@@ -32,8 +33,10 @@ export const CharacterModal: React.FC<CharacterModalProps> = ({
   const [age, setAge] = useState(16);
   const [height, setHeight] = useState('');
   const [weight, setWeight] = useState('');
-  const [year, setYear] = useState(6);
-  const [birthday, setBirthday] = useState('10월 24일');
+  const [year, setYear] = useState(1);
+  const [birthdayMonth, setBirthdayMonth] = useState(1);
+  const [birthdayDay, setBirthdayDay] = useState(1);
+  const [birthdayWeekday, setBirthdayWeekday] = useState('');
   const [bloodStatus, setBloodStatus] = useState<'순수혈통' | '혼혈' | '머글태생'>('혼혈');
 
   // 지팡이와 마법 설정 입력값
@@ -42,8 +45,6 @@ export const CharacterModal: React.FC<CharacterModalProps> = ({
   const [wandLength, setWandLength] = useState('11.5인치');
   const [wandFlex, setWandFlex] = useState('유연함');
 
-  const [patronus, setPatronus] = useState('붉은 여우');
-  const [boggart, setBoggart] = useState('소중한 이들의 상실');
   const [image, setImage] = useState('');
   const [portraitCrop, setPortraitCrop] = useState({ zoom: 1, x: 0, y: 0 });
 
@@ -55,7 +56,6 @@ export const CharacterModal: React.FC<CharacterModalProps> = ({
 
   const [background, setBackground] = useState('');
   const [quote, setQuote] = useState('');
-  const [specialty, setSpecialty] = useState('어둠의 마법 방어술');
   const [positionOrClub, setPositionOrClub] = useState('');
   const [triviaInput, setTriviaInput] = useState('');
 
@@ -73,14 +73,15 @@ export const CharacterModal: React.FC<CharacterModalProps> = ({
       setHeight(initialCharacter.height?.toString() || '');
       setWeight(initialCharacter.weight?.toString() || '');
       setYear(initialCharacter.year);
-      setBirthday(initialCharacter.birthday);
+      const birthday = parseBirthday(initialCharacter.birthday);
+      setBirthdayMonth(birthday.month);
+      setBirthdayDay(birthday.day);
+      setBirthdayWeekday(birthday.weekday);
       setBloodStatus(initialCharacter.bloodStatus);
       setWandWood(initialCharacter.wand.wood);
       setWandCore(initialCharacter.wand.core);
       setWandLength(initialCharacter.wand.length);
       setWandFlex(initialCharacter.wand.flexibility);
-      setPatronus(initialCharacter.patronus);
-      setBoggart(initialCharacter.boggart);
       setImage(initialCharacter.image);
       setPortraitCrop(initialCharacter.portraitCrop || { zoom: 1, x: 0, y: 0 });
       setAppearanceSummary(initialCharacter.appearanceSummary);
@@ -89,7 +90,6 @@ export const CharacterModal: React.FC<CharacterModalProps> = ({
       setPersonalityDetail(initialCharacter.personalityDetail);
       setBackground(initialCharacter.background);
       setQuote(initialCharacter.quote);
-      setSpecialty(initialCharacter.specialty);
       setPositionOrClub(initialCharacter.positionOrClub || '');
       setTriviaInput((initialCharacter.trivia || []).join('\n'));
     } else {
@@ -101,15 +101,15 @@ export const CharacterModal: React.FC<CharacterModalProps> = ({
       setAge(16);
       setHeight('');
       setWeight('');
-      setYear(6);
-      setBirthday('1월 1일');
+      setYear(1);
+      setBirthdayMonth(1);
+      setBirthdayDay(1);
+      setBirthdayWeekday('');
       setBloodStatus('혼혈');
       setWandWood('주목');
       setWandCore('용의 심장줄');
       setWandLength('11.5인치');
       setWandFlex('단단함');
-      setPatronus('은빛 매');
-      setBoggart('어둠의 실패');
       setImage('/src/assets/images/portrait_gryffindor_oc_1791347670977.jpg');
       setPortraitCrop({ zoom: 1, x: 0, y: 0 });
       setAppearanceSummary('');
@@ -118,7 +118,6 @@ export const CharacterModal: React.FC<CharacterModalProps> = ({
       setPersonalityDetail('');
       setBackground('');
       setQuote('');
-      setSpecialty('어둠의 마법 방어술');
       setPositionOrClub('');
       setTriviaInput('');
     }
@@ -170,8 +169,8 @@ export const CharacterModal: React.FC<CharacterModalProps> = ({
       age: Number(age) || 16,
       height: Number(height) > 0 ? Number(height) : undefined,
       weight: Number(weight) > 0 ? Number(weight) : undefined,
-      year: Number(year) || 6,
-      birthday: birthday.trim(),
+      year,
+      birthday: `${birthdayMonth}월 ${birthdayDay}일${birthdayWeekday ? ` (${birthdayWeekday})` : ''}`,
       bloodStatus,
       wand: {
         wood: wandWood.trim(),
@@ -179,8 +178,6 @@ export const CharacterModal: React.FC<CharacterModalProps> = ({
         length: wandLength.trim(),
         flexibility: wandFlex.trim(),
       },
-      patronus: patronus.trim(),
-      boggart: boggart.trim(),
       portraitCrop,
       image: image || '/src/assets/images/portrait_gryffindor_oc_1791347670977.jpg',
       appearanceSummary: appearanceSummary.trim(),
@@ -189,7 +186,6 @@ export const CharacterModal: React.FC<CharacterModalProps> = ({
       personalityDetail: personalityDetail.trim(),
       background: background.trim(),
       quote: quote.trim() || '"우리는 마법으로 연결되어 있어."',
-      specialty: specialty.trim(),
       positionOrClub: positionOrClub.trim(),
       trivia: triviaArray,
       createdAt: initialCharacter ? initialCharacter.createdAt : Date.now(),
@@ -364,15 +360,16 @@ export const CharacterModal: React.FC<CharacterModalProps> = ({
                   <div>
                     <label className="block text-xs text-[#a19d94] mb-1">학년</label>
                     <select
-                      value={year}
+                      value={[1, 4, 7].includes(year) ? year : 0}
                       onChange={(e) => setYear(Number(e.target.value))}
                       className="w-full px-2.5 py-1.5 bg-[#0c121e] border border-[#d4a33e]/25 rounded-lg text-xs text-[#e8e4dc] focus:outline-none focus:border-[#d4a33e]"
                     >
-                      {[1, 2, 3, 4, 5, 6, 7].map((yr) => (
+                      {[1, 4, 7].map((yr) => (
                         <option key={yr} value={yr}>
                           {yr}학년
                         </option>
                       ))}
+                      <option value={0}>그 외</option>
                     </select>
                   </div>
                   <div>
@@ -392,14 +389,27 @@ export const CharacterModal: React.FC<CharacterModalProps> = ({
                 {/* Birthday & Club/Position */}
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                   <div>
-                    <label className="block text-xs text-[#a19d94] mb-1">생일</label>
-                    <input
-                      type="text"
-                      value={birthday}
-                      onChange={(e) => setBirthday(e.target.value)}
-                      placeholder="예: 10월 24일"
-                      className="w-full px-3 py-2 bg-[#0c121e] border border-[#d4a33e]/25 rounded-lg text-xs text-[#e8e4dc] focus:outline-none focus:border-[#d4a33e]"
-                    />
+                    <fieldset>
+                      <legend className="block text-xs text-[#a19d94] mb-1">생일</legend>
+                      <div className="grid grid-cols-3 gap-2">
+                        <label className="text-xs text-[#a19d94]">월
+                          <select aria-label="생일 월" value={birthdayMonth} onChange={e => { const month = Number(e.target.value); setBirthdayMonth(month); setBirthdayDay(day => Math.min(day, birthdayDays(month))); }} className="w-full mt-1 px-2 py-2 bg-[#0c121e] border border-[#d4a33e]/25 rounded-lg text-xs text-[#e8e4dc]">
+                            {Array.from({ length: 12 }, (_, i) => <option key={i + 1} value={i + 1}>{i + 1}월</option>)}
+                          </select>
+                        </label>
+                        <label className="text-xs text-[#a19d94]">일
+                          <select aria-label="생일 일" value={birthdayDay} onChange={e => setBirthdayDay(Number(e.target.value))} className="w-full mt-1 px-2 py-2 bg-[#0c121e] border border-[#d4a33e]/25 rounded-lg text-xs text-[#e8e4dc]">
+                            {Array.from({ length: birthdayDays(birthdayMonth) }, (_, i) => <option key={i + 1} value={i + 1}>{i + 1}일</option>)}
+                          </select>
+                        </label>
+                        <label className="text-xs text-[#a19d94]">요일
+                          <select aria-label="생일 요일" value={birthdayWeekday} onChange={e => setBirthdayWeekday(e.target.value)} className="w-full mt-1 px-2 py-2 bg-[#0c121e] border border-[#d4a33e]/25 rounded-lg text-xs text-[#e8e4dc]">
+                            <option value="">미선택</option>
+                            {WEEKDAYS.map(day => <option key={day} value={day}>{day}</option>)}
+                          </select>
+                        </label>
+                      </div>
+                    </fieldset>
                   </div>
                   <div>
                     <label className="block text-xs text-[#a19d94] mb-1">동아리 / 퀴디치 직책</label>
@@ -462,40 +472,6 @@ export const CharacterModal: React.FC<CharacterModalProps> = ({
                     className="w-full px-2.5 py-1.5 bg-[#090d16] border border-[#d4a33e]/20 rounded text-xs text-[#e8e4dc]"
                   />
                 </div>
-              </div>
-            </div>
-
-            {/* 패트로누스, 보가트와 특기 과목 */}
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-              <div>
-                <label className="block text-xs text-[#a19d94] mb-1">패트로누스 (Patronus)</label>
-                <input
-                  type="text"
-                  value={patronus}
-                  onChange={(e) => setPatronus(e.target.value)}
-                  placeholder="예: 붉은 여우, 은빛 매"
-                  className="w-full px-3 py-2 bg-[#0c121e] border border-[#d4a33e]/25 rounded-lg text-xs text-[#e8e4dc]"
-                />
-              </div>
-              <div>
-                <label className="block text-xs text-[#a19d94] mb-1">보가트 (Boggart / 두려움)</label>
-                <input
-                  type="text"
-                  value={boggart}
-                  onChange={(e) => setBoggart(e.target.value)}
-                  placeholder="예: 소중한 이들의 상실"
-                  className="w-full px-3 py-2 bg-[#0c121e] border border-[#d4a33e]/25 rounded-lg text-xs text-[#e8e4dc]"
-                />
-              </div>
-              <div>
-                <label className="block text-xs text-[#a19d94] mb-1">특기 과목 (Specialty)</label>
-                <input
-                  type="text"
-                  value={specialty}
-                  onChange={(e) => setSpecialty(e.target.value)}
-                  placeholder="예: 어둠의 마법 방어술, 마법약학"
-                  className="w-full px-3 py-2 bg-[#0c121e] border border-[#d4a33e]/25 rounded-lg text-xs text-[#e8e4dc]"
-                />
               </div>
             </div>
 

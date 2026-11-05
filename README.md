@@ -1,5 +1,7 @@
 ﻿# Once Upon a time...
 
+Supabase setup: [SUPABASE_SETUP.md](./SUPABASE_SETUP.md). Existing admin UI and API routes are preserved. Set `ARCHIVE_STORAGE=supabase` to use PostgreSQL; the local file-storage instructions below apply to `ARCHIVE_STORAGE=file`.
+
 호그와트 기반 캐릭터 커뮤니티. 공개 명부와 인물 소개, 관리자 전용 기록 관리 페이지를 제공합니다.
 
 ## 로컬 실행

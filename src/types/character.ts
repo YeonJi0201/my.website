@@ -18,12 +18,10 @@ export interface Character {
   age: number;
   height?: number;
   weight?: number;
-  year: number; // 1-7
+  year: number; // 0: 그 외, 1-7: 학년 (기존 기록 호환)
   birthday: string;
   bloodStatus: '순수혈통' | '혼혈' | '머글태생';
   wand: WandInfo;
-  patronus: string;
-  boggart: string;
   portraitCrop?: { zoom: number; x: number; y: number };
   image: string; // PNG path or data URL
   appearanceSummary: string;
@@ -32,7 +30,6 @@ export interface Character {
   personalityDetail: string;
   background: string;
   quote: string;
-  specialty: string;
   positionOrClub?: string;
   trivia: string[];
   createdAt: number;
