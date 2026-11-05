@@ -126,7 +126,7 @@ export const HouseDirectoryPage: React.FC<HouseDirectoryPageProps> = ({
                   transition={{ duration: reduced ? 0 : 0.3 }}
                 >
                   <button type="button" className="roster-entry" onClick={() => onSelectCharacter(char.id)}>
-                    <span className="roster-portrait"><CharacterPortrait character={char} /></span>
+                    <span className="roster-portrait"><HouseEmblem house={char.house} className="roster-background-crest" decorative /><CharacterPortrait variant="profile" character={char} /></span>
                     <span className="roster-house"><HouseEmblem house={char.house} decorative />{house.nameKo} · {formatSchoolYear(char.year)}</span>
                     <span className="roster-name">{char.nameKo}</span>
                     <span className="roster-name-en" lang="en">{char.nameEn}</span>

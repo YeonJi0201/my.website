@@ -1,3 +1,4 @@
+import { MAX_IMAGE_BYTES } from '../utils/image-limits';
 import { formatSchoolYear } from '../utils/registration-fields';
 import { useEffect, useRef, useState } from 'react';
 import { ArrowLeft, LogOut, Plus, ShieldCheck, Upload, Edit3, Trash2, Search } from 'lucide-react';
@@ -53,17 +54,17 @@ export default function AdminPage({ characters, onCharactersChange }: Props) {
       const existing = characters.some(c => c.id === character.id);
       onCharactersChange(await api<Character[]>(existing ? `/api/admin/characters/${encodeURIComponent(character.id)}` : '/api/admin/characters', existing ? 'PUT' : 'POST', character));
       setMessage(`${character.nameKo}의 기록을 저장했습니다.`); setError('');
-    } catch (e) { fail(e); throw e; }
+    } catch (e) { setError(e instanceof Error ? e.message : '저장하지 못했습니다.'); throw e; }
   };
   const upload = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0], target = imageTarget.current;
     event.target.value = '';
     if (!file || !target) return;
-    if (!['image/png', 'image/jpeg', 'image/webp'].includes(file.type) || file.size > 5 * 1024 * 1024) { setError('5MB 이하의 PNG, JPG, WebP 이미지를 선택해주세요.'); return; }
+    if (file.type !== 'image/png' || file.size > MAX_IMAGE_BYTES) { setError('20MB 이하의 PNG 이미지를 선택해주세요.'); return; }
     setBusy(true); setError('');
     try {
       const image = await new Promise<string>((resolve, reject) => { const reader = new FileReader(); reader.onload = () => resolve(String(reader.result)); reader.onerror = () => reject(new Error('이미지를 읽지 못했습니다.')); reader.readAsDataURL(file); });
-      await save({ ...target, image, portraitCrop: { zoom: 1, x: 0, y: 0 } });
+      await save({ ...target, image, imageOriginal: undefined, imageThumbnail: undefined, portraitCrop: { zoom: 1, x: 0, y: 0 } });
     } catch (e) { fail(e); } finally { setBusy(false); }
   };
   const remove = async (character: Character) => {
@@ -90,8 +91,8 @@ export default function AdminPage({ characters, onCharactersChange }: Props) {
       <div className="admin-heading"><div><span className="small-caps">ADMINISTRATION · 관리자 전용</span><h1>인물 기록 관리</h1><p>캐릭터의 등록, 이미지와 프로필 수정, 기록 삭제를 관리합니다.</p></div><button className="admin-primary" onClick={() => setEditor('new')} disabled={busy}><Plus size={16} /> 캐릭터 등록</button></div>
       {error && <p className="admin-error" role="alert">{error}</p>}<p className="admin-message" role="status">{message}</p>
       <div className="admin-filters"><label><Search size={15} /><input aria-label="관리할 캐릭터 검색" placeholder="이름으로 기록 찾기" value={query} onChange={e => setQuery(e.target.value)} /></label><select aria-label="기숙사 선택" value={house} onChange={e => setHouse(e.target.value as HouseType | 'all')}><option value="all">전체 기숙사</option>{Object.values(HOUSES).map(h => <option key={h.id} value={h.id}>{h.nameKo}</option>)}</select><span>{filtered.length}개의 기록</span></div>
-      <input ref={imageInput} type="file" accept="image/png,image/jpeg,image/webp" hidden onChange={upload} />
-      <div className="admin-character-list">{filtered.map(c => <article key={c.id} data-house={c.house} className="admin-character-row"><div className="admin-portrait"><CharacterPortrait character={c} /></div><div className="admin-character-name"><span className="small-caps">{HOUSES[c.house].nameKo} · {formatSchoolYear(c.year)}</span><h2>{c.nameKo}</h2><p>{c.nameEn}</p></div><HouseEmblem house={c.house} /><div className="admin-row-actions"><button disabled={busy} onClick={() => { imageTarget.current = c; imageInput.current?.click(); }} aria-label={`${c.nameKo} 캐릭터 이미지 변경`}><Upload size={14} /> 캐릭터 이미지 변경</button><button disabled={busy} onClick={() => setEditor(c)} aria-label={`${c.nameKo} 프로필 수정`}><Edit3 size={14} /> 프로필 수정</button><button disabled={busy} className="admin-delete" onClick={() => void remove(c)} aria-label={`${c.nameKo} 기록 삭제`}><Trash2 size={14} /> 기록 삭제</button></div></article>)}{!filtered.length && <p className="admin-empty">조건에 맞는 기록이 없습니다.</p>}</div>
+      <input ref={imageInput} type="file" accept="image/png" hidden onChange={upload} />
+      <div className="admin-character-list">{filtered.map(c => <article key={c.id} data-house={c.house} className="admin-character-row"><div className="admin-portrait"><CharacterPortrait character={c} variant="thumbnail" /></div><div className="admin-character-name"><span className="small-caps">{HOUSES[c.house].nameKo} · {formatSchoolYear(c.year)}</span><h2>{c.nameKo}</h2><p>{c.nameEn}</p></div><HouseEmblem house={c.house} /><div className="admin-row-actions"><button disabled={busy} onClick={() => { imageTarget.current = c; imageInput.current?.click(); }} aria-label={`${c.nameKo} 캐릭터 이미지 변경`}><Upload size={14} /> 캐릭터 이미지 변경</button><button disabled={busy} onClick={() => setEditor(c)} aria-label={`${c.nameKo} 프로필 수정`}><Edit3 size={14} /> 프로필 수정</button><button disabled={busy} className="admin-delete" onClick={() => void remove(c)} aria-label={`${c.nameKo} 기록 삭제`}><Trash2 size={14} /> 기록 삭제</button></div></article>)}{!filtered.length && <p className="admin-empty">조건에 맞는 기록이 없습니다.</p>}</div>
       {legacyCount > 0 && <aside className="admin-legacy"><p>이 브라우저에 이전 방식으로 저장된 {legacyCount}개의 기록이 있습니다.</p><button disabled={busy} onClick={() => void importLegacy()}>기존 브라우저 기록 가져오기</button></aside>}
       <CharacterModal isOpen={editor !== null} onClose={() => setEditor(null)} onSave={save} initialCharacter={editor && editor !== 'new' ? editor : null} defaultHouse={house === 'all' ? 'gryffindor' : house} />
     </>}

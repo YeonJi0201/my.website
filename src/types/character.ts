@@ -23,7 +23,9 @@ export interface Character {
   bloodStatus: '순수혈통' | '혼혈' | '머글태생';
   wand: WandInfo;
   portraitCrop?: { zoom: number; x: number; y: number };
-  image: string; // PNG path or data URL
+  image: string; // Optimized profile URL, legacy asset path or upload data URL
+  imageOriginal?: string;
+  imageThumbnail?: string;
   appearanceSummary: string;
   appearanceDetail: string;
   personality: string[];

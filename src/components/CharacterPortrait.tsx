@@ -6,16 +6,20 @@ type FaceBox = { x: number; y: number; width: number; height: number };
 type Detector = { detect: (image: HTMLImageElement) => Promise<{ boundingBox: FaceBox }[]> };
 
 /** Shared upper-body viewport for profiles, the directory and the crop editor. */
-export function CharacterPortrait({ character, className = '' }: {
-  character: Pick<Character, 'image' | 'nameKo' | 'portraitCrop'>;
+export function CharacterPortrait({ character, className = '', variant = 'profile', loading = 'lazy' }: {
+  character: Pick<Character, 'image' | 'nameKo' | 'portraitCrop' | 'imageThumbnail'>;
   className?: string;
+  variant?: 'profile' | 'thumbnail';
+  loading?: 'lazy' | 'eager';
 }) {
   // 뷰포트 크기·원본 이미지 치수·가능한 경우 얼굴 위치를 모아 상반신 크롭을 계산한다.
+  const source = variant === 'thumbnail' ? character.imageThumbnail || character.image : character.image;
   const viewport = useRef<HTMLDivElement>(null);
   const picture = useRef<HTMLImageElement>(null);
   const [size, setSize] = useState({ width: 400, height: 500 });
   const [natural, setNatural] = useState({ width: 0, height: 0 });
   const [face, setFace] = useState<FaceBox | null>(null);
+  useEffect(() => { setNatural({ width: 0, height: 0 }); }, [source]);
   useEffect(() => {
     if (!viewport.current) return;
     const observer = new ResizeObserver(([entry]) => setSize({ width: entry.contentRect.width, height: entry.contentRect.height }));
@@ -38,7 +42,7 @@ export function CharacterPortrait({ character, className = '' }: {
     image?.addEventListener('load', detect);
     void detect();
     return () => { cancelled = true; image?.removeEventListener('load', detect); };
-  }, [character.image]);
+  }, [source]);
   const crop = character.portraitCrop;
   const sourceHeight = face ? Math.min(natural.height, face.height * 4.8) : Math.min(natural.height, natural.width * 1.25);
   const scale = natural.width ? Math.max(size.width / natural.width, size.height / natural.height, Math.max(size.width / natural.width, size.height / Math.max(1, sourceHeight)) * (crop?.zoom ?? 1)) : 1;
@@ -48,6 +52,6 @@ export function CharacterPortrait({ character, className = '' }: {
   const offsetTop = Math.min(0, Math.max(size.height - natural.height * scale, -top * scale + (crop?.y ?? 0) / 100 * size.height));
   // 계산한 배율과 위치를 이미지에 적용해 여러 화면에서 같은 초상화 구도를 재사용한다.
   return <div className={`character-portrait ${className}`} ref={viewport}>
-    <img ref={picture} src={resolvePortrait(character.image)} alt={character.nameKo} onLoad={event => setNatural({ width: event.currentTarget.naturalWidth, height: event.currentTarget.naturalHeight })} style={natural.width ? { width: natural.width * scale, height: natural.height * scale, left, top: offsetTop } : { width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'center top' }} />
+    <img ref={picture} src={resolvePortrait(source)} loading={loading} decoding="async" alt={character.nameKo} onLoad={event => setNatural({ width: event.currentTarget.naturalWidth, height: event.currentTarget.naturalHeight })} style={natural.width ? { width: natural.width * scale, height: natural.height * scale, left, top: offsetTop } : { width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'center top' }} />
   </div>;
 }

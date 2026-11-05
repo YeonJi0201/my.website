@@ -47,7 +47,7 @@ export const CharacterProfilePage: React.FC<CharacterProfilePageProps> = ({ char
         </motion.aside>
         <motion.div key={`portrait-${character.id}`} className="center-portrait profile-center" initial={{ opacity: 0, x: reducedMotion ? 0 : 35 }} animate={{ opacity: 1, x: 0 }} transition={{ duration: reducedMotion ? 0 : .8, ease: [0.16, 1, 0.3, 1] }}>
           <button ref={zoomTrigger} className="enchanted-frame" onClick={() => setZoom(true)} aria-label={`${character.nameKo} 이미지 확대`}>
-            <CharacterPortrait character={character} />
+            <CharacterPortrait character={character} loading="eager" />
             <span className="portrait-invitation"><Maximize2 size={13} /> 초상화 확대</span>
           </button>
         </motion.div>
@@ -77,6 +77,6 @@ export const CharacterProfilePage: React.FC<CharacterProfilePageProps> = ({ char
     </section>
     <footer className="dossier-colophon"><button onClick={onBackToDirectory}><ArrowLeft size={14} /> 명부로 돌아가기</button></footer>
     {/* 초상화 확대 보기와 Escape·Tab 키보드 조작 */}
-    <AnimatePresence>{zoom && <motion.div className="portrait-lightbox" role="dialog" aria-modal="true" aria-label="캐릭터 초상화" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={() => setZoom(false)} onKeyDown={e => { if (e.key === 'Escape') setZoom(false); if (e.key === 'Tab') { e.preventDefault(); closeButton.current?.focus(); } }}><button ref={closeButton} onClick={() => setZoom(false)} aria-label="닫기"><X /></button><img src={resolvePortrait(character.image)} alt={character.nameKo} /></motion.div>}</AnimatePresence>
+    <AnimatePresence>{zoom && <motion.div className="portrait-lightbox" role="dialog" aria-modal="true" aria-label="캐릭터 초상화" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={() => setZoom(false)} onKeyDown={e => { if (e.key === 'Escape') setZoom(false); if (e.key === 'Tab') { e.preventDefault(); closeButton.current?.focus(); } }}><button ref={closeButton} onClick={() => setZoom(false)} aria-label="닫기"><X /></button><img src={resolvePortrait(character.imageOriginal || character.image)} alt={character.nameKo} /></motion.div>}</AnimatePresence>
   </div>;
 };

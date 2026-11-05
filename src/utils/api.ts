@@ -8,14 +8,15 @@ export class ApiError extends Error {
 // 같은 출처의 세션 쿠키를 포함해 JSON API를 호출하고 서버 오류를 명시적으로 전달한다.
 // 같은 출처의 세션 쿠키를 포함해 JSON API를 호출하고 서버 오류를 명시적으로 전달한다.
 export async function api<T>(url: string, method = 'GET', body?: unknown): Promise<T> {
-  const response = await fetch(url, {
+  let response: Response;
+  try { response = await fetch(url, {
     method,
     credentials: 'same-origin',
     headers: method === 'GET' ? undefined : { 'Content-Type': 'application/json' },
     body: body === undefined ? undefined : JSON.stringify(body),
-  });
+  }); } catch { throw new ApiError('서버에 연결하지 못했습니다. 인터넷 연결과 개발 서버 실행 여부를 확인해주세요.', 0); }
   const result = await response.json().catch(() => ({}));
-  if (!response.ok) throw new ApiError(result.error || '요청을 완료하지 못했습니다.', response.status);
+  if (!response.ok) throw new ApiError(response.status === 401 ? '관리자 로그인이 만료되었거나 로그인되지 않았습니다. 다시 로그인한 뒤 저장해주세요.' : result.error || `요청을 완료하지 못했습니다. (HTTP ${response.status})`, response.status);
   return result;
 }
 export const getCharacters = () => api<Character[]>('/api/characters');

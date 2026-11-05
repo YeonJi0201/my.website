@@ -10,7 +10,7 @@ export interface CharacterStore {
   remove(id: string): Promise<void>;
   import(characters: Character[]): Promise<void>;
 }
-export const storeError = (status: number, message: string) => Object.assign(new Error(message), { status });
+export const storeError = (status: number, message: string) => Object.assign(new Error(message), { status, expose: true });
 
 export function createFileStore(directory: string): CharacterStore {
   const file = path.join(directory, 'characters.json');

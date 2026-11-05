@@ -1,3 +1,5 @@
+import { MAX_IMAGE_BYTES } from '../utils/image-limits';
+import { characterErrors } from '../utils/character-validation';
 import { CharacterPortrait } from './CharacterPortrait';
 import { resolvePortrait } from '../utils/portraits';
 import React, { useState, useRef, useEffect } from 'react';
@@ -5,6 +7,7 @@ import { motion, AnimatePresence } from 'motion/react';
 import { X, Upload, Sparkles, Wand2, Shield, Image as ImageIcon } from 'lucide-react';
 import { Character, HouseType } from '../types/character';
 import { HOUSES } from '../data/houseData';
+import { WAND_WOODS, WAND_CORES, WAND_LENGTHS, WAND_FLEXIBILITIES } from '../data/wand-options';
 import { sound } from '../utils/audio';
 import { birthdayDays, parseBirthday, WEEKDAYS } from '../utils/registration-fields';
 
@@ -27,6 +30,8 @@ export const CharacterModal: React.FC<CharacterModalProps> = ({
   const [nameKo, setNameKo] = useState('');
   const [saving, setSaving] = useState(false);
   const [saveError, setSaveError] = useState('');
+  const errorMessageRef = useRef<HTMLParagraphElement>(null);
+  useEffect(() => { if (saveError) { errorMessageRef.current?.scrollIntoView({ block: 'nearest', behavior: 'smooth' }); errorMessageRef.current?.focus({ preventScroll: true }); } }, [saveError]);
   const [nameEn, setNameEn] = useState('');
   const [house, setHouse] = useState<HouseType>(defaultHouse);
   const [gender, setGender] = useState('여성');
@@ -41,9 +46,9 @@ export const CharacterModal: React.FC<CharacterModalProps> = ({
 
   // 지팡이와 마법 설정 입력값
   const [wandWood, setWandWood] = useState('마가목');
-  const [wandCore, setWandCore] = useState('불사조 깃털');
-  const [wandLength, setWandLength] = useState('11.5인치');
-  const [wandFlex, setWandFlex] = useState('유연함');
+  const [wandCore, setWandCore] = useState('불사조의 깃털');
+  const [wandLength, setWandLength] = useState('11인치');
+  const [wandFlex, setWandFlex] = useState('단단함');
 
   const [image, setImage] = useState('');
   const [portraitCrop, setPortraitCrop] = useState({ zoom: 1, x: 0, y: 0 });
@@ -107,8 +112,8 @@ export const CharacterModal: React.FC<CharacterModalProps> = ({
       setBirthdayWeekday('');
       setBloodStatus('혼혈');
       setWandWood('주목');
-      setWandCore('용의 심장줄');
-      setWandLength('11.5인치');
+      setWandCore('용의 심근');
+      setWandLength('11인치');
       setWandFlex('단단함');
       setImage('/src/assets/images/portrait_gryffindor_oc_1791347670977.jpg');
       setPortraitCrop({ zoom: 1, x: 0, y: 0 });
@@ -127,8 +132,14 @@ export const CharacterModal: React.FC<CharacterModalProps> = ({
   const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
-
+    if (file.type !== 'image/png' || file.size > MAX_IMAGE_BYTES) {
+      setSaveError('캐릭터 이미지: 20MB 이하의 PNG 파일을 선택해주세요.');
+      e.target.value = '';
+      return;
+    }
+    setSaveError('');
     const reader = new FileReader();
+    reader.onerror = () => setSaveError('이미지 파일을 읽지 못했습니다. 파일을 다시 선택해주세요.');
     reader.onload = (event) => {
       const dataUrl = event.target?.result as string;
       if (dataUrl) {
@@ -146,7 +157,7 @@ export const CharacterModal: React.FC<CharacterModalProps> = ({
     if (saving) return;
 
     if (!nameKo.trim()) {
-      alert('캐릭터 한글 이름을 입력해주세요.');
+      setSaveError('캐릭터 한글 이름을 입력해주세요.');
       return;
     }
 
@@ -179,6 +190,8 @@ export const CharacterModal: React.FC<CharacterModalProps> = ({
         flexibility: wandFlex.trim(),
       },
       portraitCrop,
+      imageOriginal: image === initialCharacter?.image ? initialCharacter.imageOriginal : undefined,
+      imageThumbnail: image === initialCharacter?.image ? initialCharacter.imageThumbnail : undefined,
       image: image || '/src/assets/images/portrait_gryffindor_oc_1791347670977.jpg',
       appearanceSummary: appearanceSummary.trim(),
       appearanceDetail: appearanceDetail.trim(),
@@ -191,6 +204,8 @@ export const CharacterModal: React.FC<CharacterModalProps> = ({
       createdAt: initialCharacter ? initialCharacter.createdAt : Date.now(),
     };
 
+    const errors = characterErrors(characterData);
+    if (errors.length) { setSaveError(errors.join('\n')); return; }
     setSaving(true); setSaveError('');
     try { await onSave(characterData); sound.playChime('lumos'); onClose(); }
     catch (error) { setSaveError(error instanceof Error ? error.message : '저장하지 못했습니다.'); }
@@ -227,7 +242,7 @@ export const CharacterModal: React.FC<CharacterModalProps> = ({
 
           {/* 저장 상태와 입력 섹션을 포함한 전체 편집 폼 */}
           <form aria-busy={saving} onSubmit={handleSubmit} className="p-6 space-y-6 max-h-[75vh] overflow-y-auto custom-scrollbar">
-            {saveError && <p role="alert" className="admin-error">{saveError}</p>}
+            {saveError && <p ref={errorMessageRef} tabIndex={-1} role="alert" className="admin-error" style={{ whiteSpace: 'pre-line' }}><strong>저장하지 못했습니다.</strong><br />{saveError}</p>}
             {/* 초상화 업로드·크롭 및 기숙사·기본 인물 정보 */}
             <div className="grid grid-cols-1 md:grid-cols-12 gap-6">
               {/* 이미지 미리보기, 파일 업로드, 확대·위치 크롭 조정 */}
@@ -249,7 +264,7 @@ export const CharacterModal: React.FC<CharacterModalProps> = ({
                 <input
                   ref={fileInputRef}
                   type="file"
-                  accept="image/png, image/jpeg, image/webp"
+                  accept="image/png"
                   onChange={handleFileUpload}
                   className="hidden"
                 />
@@ -434,43 +449,51 @@ export const CharacterModal: React.FC<CharacterModalProps> = ({
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
                 <div>
                   <label className="block text-[11px] text-[#888] mb-1">목재 (Wood)</label>
-                  <input
-                    type="text"
+                  <select
+                    aria-label="지팡이 목재"
                     value={wandWood}
                     onChange={(e) => setWandWood(e.target.value)}
-                    placeholder="예: 주목, 마가목"
                     className="w-full px-2.5 py-1.5 bg-[#090d16] border border-[#d4a33e]/20 rounded text-xs text-[#e8e4dc]"
-                  />
+                  >
+                    {!WAND_WOODS.some(wood => wood.value === wandWood) && <option value={wandWood}>{wandWood || '미등록'} (기존 값)</option>}
+                    {WAND_WOODS.map(wood => <option key={wood.value} value={wood.value}>{wood.label}</option>)}
+                  </select>
                 </div>
                 <div>
                   <label className="block text-[11px] text-[#888] mb-1">심 (Core)</label>
-                  <input
-                    type="text"
+                  <select
+                    aria-label="지팡이 심"
                     value={wandCore}
                     onChange={(e) => setWandCore(e.target.value)}
-                    placeholder="예: 불사조 깃털, 용 심장줄"
                     className="w-full px-2.5 py-1.5 bg-[#090d16] border border-[#d4a33e]/20 rounded text-xs text-[#e8e4dc]"
-                  />
+                  >
+                    {!WAND_CORES.some(core => core.value === wandCore) && <option value={wandCore}>{wandCore || '미등록'} (기존 값)</option>}
+                    {WAND_CORES.map(core => <option key={core.value} value={core.value}>{core.label}</option>)}
+                  </select>
                 </div>
                 <div>
                   <label className="block text-[11px] text-[#888] mb-1">길이 (Length)</label>
-                  <input
-                    type="text"
+                  <select
+                    aria-label="지팡이 길이"
                     value={wandLength}
                     onChange={(e) => setWandLength(e.target.value)}
-                    placeholder="예: 11.5인치"
                     className="w-full px-2.5 py-1.5 bg-[#090d16] border border-[#d4a33e]/20 rounded text-xs text-[#e8e4dc]"
-                  />
+                  >
+                    {!WAND_LENGTHS.some(length => length.value === wandLength) && <option value={wandLength}>{wandLength || '미등록'} (기존 값)</option>}
+                    {WAND_LENGTHS.map(length => <option key={length.value} value={length.value}>{length.label}</option>)}
+                  </select>
                 </div>
                 <div>
-                  <label className="block text-[11px] text-[#888] mb-1">유연성 (Flexibility)</label>
-                  <input
-                    type="text"
+                  <label className="block text-[11px] text-[#888] mb-1">유연함 (Flexibility)</label>
+                  <select
+                    aria-label="지팡이 유연함"
                     value={wandFlex}
                     onChange={(e) => setWandFlex(e.target.value)}
-                    placeholder="예: 유연함, 단단함"
                     className="w-full px-2.5 py-1.5 bg-[#090d16] border border-[#d4a33e]/20 rounded text-xs text-[#e8e4dc]"
-                  />
+                  >
+                    {!WAND_FLEXIBILITIES.some(flexibility => flexibility.value === wandFlex) && <option value={wandFlex}>{wandFlex || '미등록'} (기존 값)</option>}
+                    {WAND_FLEXIBILITIES.map(flexibility => <option key={flexibility.value} value={flexibility.value}>{flexibility.label}</option>)}
+                  </select>
                 </div>
               </div>
             </div>

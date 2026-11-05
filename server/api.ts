@@ -1,3 +1,4 @@
+import { characterErrors } from '../src/utils/character-validation.ts';
 import express, { type Request, type Response } from 'express';
 import { randomBytes, scryptSync, timingSafeEqual } from 'node:crypto';
 import { createFileStore, type CharacterStore } from './character-store.ts';
@@ -10,21 +11,7 @@ const COOKIE = 'once_admin_session';
 
 // 외부 입력이 캐릭터 데이터 계약과 이미지·범위 제한을 만족하는지 서버에서 검증한다.
 export function validCharacter(value: unknown): value is Character {
-  if (!value || typeof value !== 'object') return false;
-  const c = value as Character;
-  const strings = ['id', 'nameKo', 'nameEn', 'gender', 'birthday', 'appearanceSummary', 'appearanceDetail', 'personalityDetail', 'background', 'quote'] as const;
-  if (!strings.every(k => typeof c[k] === 'string' && c[k].length <= 20000)) return false;
-  if (!/^[a-zA-Z0-9_-]{1,120}$/.test(c.id) || !c.nameKo.trim() || !c.nameEn.trim()) return false;
-  if (!['gryffindor', 'slytherin', 'ravenclaw', 'hufflepuff'].includes(c.house) || !['순수혈통', '혼혈', '머글태생'].includes(c.bloodStatus)) return false;
-  if (!Number.isInteger(c.age) || c.age < 1 || c.age > 200 || !Number.isInteger(c.year) || c.year < 0 || c.year > 7 || !Number.isFinite(c.createdAt)) return false;
-  if (c.height !== undefined && (!Number.isFinite(c.height) || c.height < 1 || c.height > 300)) return false;
-  if (c.weight !== undefined && (!Number.isFinite(c.weight) || c.weight < 1 || c.weight > 500)) return false;
-  if (![c.personality, c.trivia].every(a => Array.isArray(a) && a.length <= 100 && a.every(s => typeof s === 'string' && s.length <= 5000))) return false;
-  if (!c.wand || !['wood', 'core', 'length', 'flexibility'].every(k => typeof c.wand[k as keyof Character['wand']] === 'string' && c.wand[k as keyof Character['wand']].length <= 1000)) return false;
-  if (c.positionOrClub !== undefined && (typeof c.positionOrClub !== 'string' || c.positionOrClub.length > 1000)) return false;
-  if (typeof c.image !== 'string' || c.image.length > 7_000_000 || !(/^(\/src\/assets\/images\/|\/assets\/)[\w.-]+$/.test(c.image) || /^data:image\/(png|jpeg|webp);base64,[A-Za-z0-9+/=]+$/.test(c.image))) return false;
-  if (c.portraitCrop && (!Number.isFinite(c.portraitCrop.zoom) || c.portraitCrop.zoom < .5 || c.portraitCrop.zoom > 3 || !Number.isFinite(c.portraitCrop.x) || Math.abs(c.portraitCrop.x) > 100 || !Number.isFinite(c.portraitCrop.y) || Math.abs(c.portraitCrop.y) > 100)) return false;
-  return true;
+  return characterErrors(value).length === 0;
 }
 
 export function createApi(options: Options) {
@@ -90,12 +77,15 @@ export function createApi(options: Options) {
   });
   // 인증된 관리자만 캐릭터 등록·수정·삭제와 기존 데이터 병합을 수행한다.
   api.post('/api/admin/characters', asyncRoute(async (req, res) => {
-    if (!validCharacter(req.body)) { res.status(400).json({ error: '캐릭터 입력값과 이미지 형식을 확인해주세요.' }); return; }
+    const errors = characterErrors(req.body);
+    if (errors.length) { res.status(400).json({ error: errors.join('\n') }); return; }
     await store.create(req.body);
     res.status(201).json(await store.list());
   }));
   api.put('/api/admin/characters/:id', asyncRoute(async (req, res) => {
-    if (!validCharacter(req.body) || req.body.id !== req.params.id) { res.status(400).json({ error: '캐릭터 입력값과 이미지 형식을 확인해주세요.' }); return; }
+    const errors = characterErrors(req.body);
+    if (errors.length) { res.status(400).json({ error: errors.join('\n') }); return; }
+    if (req.body.id !== req.params.id) { res.status(400).json({ error: '수정할 캐릭터 ID가 일치하지 않습니다. 명부를 새로고침해주세요.' }); return; }
     await store.update(req.body);
     res.json(await store.list());
   }));
@@ -109,11 +99,11 @@ export function createApi(options: Options) {
     res.json(await store.list());
   }));
   api.use('/api', (_req, res) => { res.status(404).json({ error: '존재하지 않는 요청입니다.' }); });
-  api.use((error: Error & { status?: number; type?: string }, _req: Request, res: Response, _next: express.NextFunction) => {
+  api.use((error: Error & { status?: number; type?: string; expose?: boolean }, _req: Request, res: Response, _next: express.NextFunction) => {
     // 모든 비동기 라우트의 오류를 상태 코드와 한국어 JSON 응답으로 변환한다.
     const status = error.status || 500;
-    if (status >= 500) console.error('Archive API error:', error.message);
-    res.status(status).json({ error: status === 413 ? '파일이 너무 큽니다.' : status >= 500 ? '기록을 저장하지 못했습니다. 잠시 후 다시 시도해주세요.' : error.type === 'entity.parse.failed' ? '올바른 JSON 형식이 아닙니다.' : error.message });
+    if (status >= 500) console.error('Archive API error:', { status, category: error.expose ? 'storage' : 'internal' });
+    res.status(status).json({ error: status === 413 ? '파일이 너무 큽니다.' : status >= 500 ? (error.expose ? error.message : '서버에서 기록을 처리하지 못했습니다. 잠시 후 다시 시도해주세요. 계속되면 서버 로그를 확인해주세요.') : error.type === 'entity.parse.failed' ? '올바른 JSON 형식이 아닙니다.' : error.message });
   });
   return api;
 }

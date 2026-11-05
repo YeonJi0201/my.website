@@ -1,5 +1,7 @@
 # Supabase 최초 설정
 
+이미지 저장·운영 안내: [STORAGE_IMAGES.md](./STORAGE_IMAGES.md).
+
 프론트엔드와 관리자 화면은 기존 것을 사용합니다. 브라우저 → Express API → Supabase PostgreSQL 순서로 동작합니다. 관리자 인증은 기존 서버 로그인과 HttpOnly 쿠키를 사용하며, Supabase Auth의 회원가입은 필요하지 않습니다.
 
 ## 1. 프로젝트 만들기
@@ -19,7 +21,7 @@
 
 이 SQL은 `public.characters` 테이블, 수정 시간 트리거, 인덱스를 만듭니다. RLS를 활성화하고 `anon`과 `authenticated`의 직접 접근을 차단합니다. 서버 전용 `service_role`만 읽기와 쓰기가 가능합니다. Supabase Auth에 가입했다는 이유만으로 관리자가 되지 않습니다.
 
-프로필은 기존 `Character` 구조를 보존한 JSONB로 저장하며 캐릭터 ID가 기본 키입니다. 이미지와 크롭 정보도 기존 형식 그대로 저장합니다. 이번 구현은 이미지 파일을 별도 Supabase Storage 버킷으로 옮기지 않습니다.
+프로필은 기존 `Character` 구조를 보존한 JSONB로 저장하며 캐릭터 ID가 기본 키입니다. 크롭 정보는 그대로 보존하며, 업로드 이미지는 Supabase Storage에 저장하고 DB에는 원본·프로필·썸네일 주소만 기록합니다. 자세한 내용은 STORAGE_IMAGES.md를 참고하세요.
 
 ## 3. 로컬 연결 설정
 

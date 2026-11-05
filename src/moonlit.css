@@ -520,3 +520,34 @@ body:has(.roster) .smoke-veil { opacity: .3; }
 @media (prefers-reduced-motion: reduce) {
   .site-header { transition: none; }
 }
+
+/* Transparent portraits sit in a house-colored heraldic alcove. */
+.roster-grid [data-house="gryffindor"] { --portrait-wall: #654044; --portrait-shadow: #382329; }
+.roster-grid [data-house="slytherin"] { --portrait-wall: #3f6558; --portrait-shadow: #213e36; }
+.roster-grid [data-house="ravenclaw"] { --portrait-wall: #455b7c; --portrait-shadow: #27354e; }
+.roster-grid [data-house="hufflepuff"] { --portrait-wall: #8a7546; --portrait-shadow: #4d4029; }
+.roster-grid .roster-portrait {
+  isolation: isolate;
+  background:
+    radial-gradient(ellipse at 50% 32%, #f2e6c41c, transparent 65%),
+    repeating-linear-gradient(90deg, #ffffff03 0 1px, transparent 1px 5px),
+    linear-gradient(160deg, var(--portrait-wall), var(--portrait-shadow));
+}
+.roster-grid .roster-portrait::before {
+  content: ''; position: absolute; z-index: -1; inset: 7% 9% -18%;
+  border: 1px solid color-mix(in srgb, var(--house-metal) 35%, transparent);
+  border-radius: 48% 48% 0 0;
+  box-shadow: 0 0 0 8px #ffffff03, 0 0 0 9px #ffffff08;
+  pointer-events: none;
+}
+.roster-grid .roster-portrait::after {
+  content: ''; position: absolute; z-index: 2; inset: 0;
+  background: linear-gradient(0deg, var(--portrait-shadow), transparent 24%);
+  opacity: .48; pointer-events: none;
+}
+.roster-grid .roster-portrait .roster-background-crest {
+  position: absolute; z-index: -1; width: 63%; height: 66%;
+  top: 7%; left: 18.5%; color: var(--house-metal); opacity: .19;
+  pointer-events: none;
+}
+.roster-grid .roster-portrait .character-portrait { z-index: 1; background: transparent; }
