@@ -1,5 +1,6 @@
 ﻿/** Vector wordmark: an illuminated storybook beneath a pointed medieval arch. */
 export function StorybookLogo() {
+  // 아치·별빛·펼친 책과 서비스 이름을 하나의 접근 가능한 SVG 로고로 표현한다.
   return <div className="storybook-logo">
     <svg viewBox="0 0 440 470" role="img" aria-labelledby="storybook-logo-title">
       <title id="storybook-logo-title">Once Upon a time...</title>

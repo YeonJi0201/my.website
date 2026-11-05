@@ -4,6 +4,7 @@ type Particle = { x: number; y: number; radius: number; phase: number; speed: nu
 type Spark = { x: number; y: number; life: number; vx: number; vy: number };
 type Meteor = { x: number; y: number; age: number; life: number; vx: number; vy: number; tail: number };
 
+// 동작 줄이기·탭 가시성을 존중하며 별가루, 포인터 반짝임, 별똥별을 그리는 배경 캔버스다.
 export function MagicalBackground() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   useEffect(() => {
@@ -21,10 +22,12 @@ export function MagicalBackground() {
       ctx.setTransform(ratio, 0, 0, ratio, 0, 0);
       particles = Array.from({ length: width < 760 ? 25 : 42 }, () => ({ x: Math.random() * width, y: Math.random() * height, radius: .5 + Math.random(), phase: Math.random() * Math.PI * 2, speed: 7 + Math.random() * 12 }));
     };
+    // 포인터 입력을 제한된 수의 짧은 입자로 바꾸어 캔버스에 추가한다.
     const pointer = (event: PointerEvent) => {
       if (motion.matches || event.pointerType === 'touch' || sparks.length >= 30 || document.hidden) return;
       sparks.push({ x: event.clientX, y: event.clientY, life: 1, vx: (Math.random() - .5) * 32, vy: 12 + Math.random() * 30 });
     };
+    // 경과 시간에 맞춰 별과 별똥별, 포인터 입자를 갱신하고 다음 프레임을 예약한다.
     const render = (time: number) => {
       if (motion.matches || document.hidden) { ctx.clearRect(0, 0, width, height); previous = 0; return; }
       const dt = Math.min((time - (previous || time)) / 1000, .05);

@@ -1,16 +1,15 @@
 import express, { type Request, type Response } from 'express';
 import { randomBytes, scryptSync, timingSafeEqual } from 'node:crypto';
-import { mkdir, readFile, rename, writeFile } from 'node:fs/promises';
-import path from 'node:path';
-import { INITIAL_CHARACTERS } from '../src/data/initialCharacters.ts';
+import { createFileStore, type CharacterStore } from './character-store.ts';
 import type { Character } from '../src/types/character.ts';
 
 const asyncRoute = (handler: (req: Request, res: Response) => Promise<void>) => (req: Request, res: Response, next: express.NextFunction) => { Promise.resolve(handler(req, res)).catch(next); };
-type Options = { username: string; passwordHash: string; dataDirectory: string; secureCookie?: boolean };
+type Options = { username: string; passwordHash: string; dataDirectory: string; secureCookie?: boolean; store?: CharacterStore };
 const SESSION_LIFETIME = 8 * 60 * 60 * 1000;
 const COOKIE = 'once_admin_session';
 
-function validCharacter(value: unknown): value is Character {
+// 외부 입력이 캐릭터 데이터 계약과 이미지·범위 제한을 만족하는지 서버에서 검증한다.
+export function validCharacter(value: unknown): value is Character {
   if (!value || typeof value !== 'object') return false;
   const c = value as Character;
   const strings = ['id', 'nameKo', 'nameEn', 'gender', 'birthday', 'patronus', 'boggart', 'appearanceSummary', 'appearanceDetail', 'personalityDetail', 'background', 'quote', 'specialty'] as const;
@@ -29,27 +28,12 @@ function validCharacter(value: unknown): value is Character {
 }
 
 export function createApi(options: Options) {
+  // 저장소 경로, 직렬화된 파일 갱신, 메모리 세션과 로그인 시도 제한을 API 인스턴스별로 관리한다.
   const api = express();
   api.disable('x-powered-by');
   const sessions = new Map<string, number>();
   const attempts = new Map<string, { count: number; expires: number }>();
-  const dataFile = path.join(options.dataDirectory, 'characters.json');
-  let queue: Promise<unknown> = Promise.resolve();
-  const readCharacters = async (): Promise<Character[]> => {
-    try { return JSON.parse(await readFile(dataFile, 'utf8')); }
-    catch (error) { if ((error as NodeJS.ErrnoException).code === 'ENOENT') return structuredClone(INITIAL_CHARACTERS); throw error; }
-  };
-  const mutate = (update: (characters: Character[]) => Character[]) => {
-    const operation = queue.then(async () => {
-      const result = update(await readCharacters());
-      await mkdir(options.dataDirectory, { recursive: true });
-      await writeFile(`${dataFile}.tmp`, JSON.stringify(result, null, 2), { mode: 0o600 });
-      await rename(`${dataFile}.tmp`, dataFile);
-      return result;
-    });
-    queue = operation.catch(() => {});
-    return operation;
-  };
+  const store = options.store ?? createFileStore(options.dataDirectory);
   const token = (req: Request) => req.headers.cookie?.split(';').map(c => c.trim()).find(c => c.startsWith(`${COOKIE}=`))?.slice(COOKIE.length + 1) || '';
   const authenticated = (req: Request) => {
     const key = token(req), expiry = sessions.get(key);
@@ -69,8 +53,9 @@ export function createApi(options: Options) {
     next();
   });
   api.use(express.json({ limit: '45mb' }));
-  api.get('/api/characters', (_req, res, next) => { readCharacters().then(value => res.json(value)).catch(next); });
+  api.get('/api/characters', (_req, res, next) => { store.list().then(value => res.json(value)).catch(next); });
   api.get('/api/admin/session', (req, res) => { res.json({ authenticated: authenticated(req) }); });
+  // 관리자 로그인은 원본 비밀번호를 비교하고 제한된 세션 쿠키를 발급한다.
   api.post('/api/admin/login', (req, res) => {
     if (!options.passwordHash) { res.status(503).json({ error: '관리자 계정이 설정되지 않았습니다. 서버에서 계정을 설정해주세요.' }); return; }
     const address = req.socket.remoteAddress || 'unknown';
@@ -98,37 +83,34 @@ export function createApi(options: Options) {
     sessions.delete(token(req));
     res.clearCookie(COOKIE, cookieOptions(req)).json({ authenticated: false });
   });
+  // 이후 모든 관리자 경로에서 세션 인증을 강제한다.
   api.use('/api/admin', (req, res, next) => {
     if (!authenticated(req)) { res.status(401).json({ error: '관리자 로그인이 필요합니다.' }); return; }
     next();
   });
+  // 인증된 관리자만 캐릭터 등록·수정·삭제와 기존 데이터 병합을 수행한다.
   api.post('/api/admin/characters', asyncRoute(async (req, res) => {
     if (!validCharacter(req.body)) { res.status(400).json({ error: '캐릭터 입력값과 이미지 형식을 확인해주세요.' }); return; }
-    const result = await mutate(characters => {
-      if (characters.some(c => c.id === req.body.id)) throw Object.assign(new Error('이미 등록된 캐릭터입니다.'), { status: 409 });
-      return [req.body, ...characters];
-    });
-    res.status(201).json(result);
+    await store.create(req.body);
+    res.status(201).json(await store.list());
   }));
   api.put('/api/admin/characters/:id', asyncRoute(async (req, res) => {
     if (!validCharacter(req.body) || req.body.id !== req.params.id) { res.status(400).json({ error: '캐릭터 입력값과 이미지 형식을 확인해주세요.' }); return; }
-    res.json(await mutate(characters => {
-      if (!characters.some(c => c.id === req.params.id)) throw Object.assign(new Error('캐릭터를 찾을 수 없습니다.'), { status: 404 });
-      return characters.map(c => c.id === req.params.id ? req.body : c);
-    }));
+    await store.update(req.body);
+    res.json(await store.list());
   }));
   api.delete('/api/admin/characters/:id', asyncRoute(async (req, res) => {
-    res.json(await mutate(characters => {
-      if (!characters.some(c => c.id === req.params.id)) throw Object.assign(new Error('캐릭터를 찾을 수 없습니다.'), { status: 404 });
-      return characters.filter(c => c.id !== req.params.id);
-    }));
+    await store.remove(String(req.params.id));
+    res.json(await store.list());
   }));
   api.post('/api/admin/import', asyncRoute(async (req, res) => {
     if (!Array.isArray(req.body) || !req.body.length || req.body.length > 200 || !req.body.every(validCharacter) || new Set(req.body.map(c => c.id)).size !== req.body.length) { res.status(400).json({ error: '가져올 기록 형식을 확인해주세요.' }); return; }
-    res.json(await mutate(characters => [...req.body, ...characters.filter(c => !req.body.some((old: Character) => old.id === c.id))]));
+    await store.import(req.body);
+    res.json(await store.list());
   }));
   api.use('/api', (_req, res) => { res.status(404).json({ error: '존재하지 않는 요청입니다.' }); });
   api.use((error: Error & { status?: number; type?: string }, _req: Request, res: Response, _next: express.NextFunction) => {
+    // 모든 비동기 라우트의 오류를 상태 코드와 한국어 JSON 응답으로 변환한다.
     const status = error.status || 500;
     if (status >= 500) console.error('Archive API error:', error.message);
     res.status(status).json({ error: status === 413 ? '파일이 너무 큽니다.' : status >= 500 ? '기록을 저장하지 못했습니다. 잠시 후 다시 시도해주세요.' : error.type === 'entity.parse.failed' ? '올바른 JSON 형식이 아닙니다.' : error.message });

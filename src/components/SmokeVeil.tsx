@@ -1,5 +1,6 @@
 import { useEffect, useRef } from 'react';
 
+// 부드러운 연기 스프라이트를 화면에 합성하고 리사이즈·동작 줄이기 상태를 반영한다.
 export function SmokeVeil() {
   const ref = useRef<HTMLCanvasElement>(null);
   useEffect(() => {

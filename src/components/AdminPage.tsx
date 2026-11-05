@@ -9,6 +9,7 @@ import { HouseEmblem } from './HouseEmblem';
 
 type Props = { characters: Character[]; onCharactersChange: (characters: Character[]) => void };
 export default function AdminPage({ characters, onCharactersChange }: Props) {
+  // 세션 확인 결과에 따라 로그인 또는 관리 화면을 보여주고 요청 상태를 공유한다.
   const [status, setStatus] = useState<'checking' | 'guest' | 'admin'>('checking');
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
@@ -27,6 +28,8 @@ export default function AdminPage({ characters, onCharactersChange }: Props) {
     try { const old = JSON.parse(localStorage.getItem('utopia_hogwarts_characters_v1') || 'null'); if (Array.isArray(old)) setLegacyCount(old.length); } catch {}
     return () => { active = false; };
   }, []);
+
+  // 인증·등록·수정·이미지 교체·삭제 및 이전 브라우저 기록 가져오기 요청을 처리한다.
   const fail = (e: unknown) => {
     if (e instanceof ApiError && e.status === 401) { setStatus('guest'); setEditor(null); }
     setError(e instanceof Error ? e.message : '요청을 완료하지 못했습니다.');
@@ -75,6 +78,8 @@ export default function AdminPage({ characters, onCharactersChange }: Props) {
     catch (e) { fail(e); } finally { setBusy(false); }
   };
   const filtered = characters.filter(c => (house === 'all' || house === c.house) && `${c.nameKo} ${c.nameEn}`.toLowerCase().includes(query.toLowerCase()));
+
+  // 로그인 폼과 검색 가능한 기록 목록, 편집 모달을 인증 상태별로 렌더링한다.
   return <main className="admin-page">
     <div className="admin-topbar"><a href="/"><ArrowLeft size={15} /> 커뮤니티로 돌아가기</a><span>Once Upon a time...</span>{status === 'admin' && <button onClick={() => void logout()} disabled={busy}><LogOut size={15} /> 로그아웃</button>}</div>
     {status === 'checking' ? <p className="archive-loading" role="status">출입 권한을 확인하는 중입니다…</p> : status === 'guest' ? <section className="admin-login">

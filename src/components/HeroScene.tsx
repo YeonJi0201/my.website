@@ -5,6 +5,7 @@ import { createHeroRenderer, type HeroRenderer } from '../utils/heroRenderer';
 
 type Mode = 'pending' | 'live' | 'still';
 
+// 비동기 이미지 디코딩을 마친 뒤 WebGL 초기화에 넘긴다.
 const loadImage = (src: string) => new Promise<HTMLImageElement>((resolve, reject) => {
   const image = new Image();
   image.decoding = 'async';
@@ -24,6 +25,7 @@ export function HeroScene({ onReady }: { onReady: () => void }) {
 
   useEffect(() => { readyRef.current = onReady; }, [onReady]);
 
+  // 동작 설정·기기 조건에 따라 WebGL 장면 또는 정지 이미지를 선택하고 자원을 정리한다.
   useEffect(() => {
     const container = frame.current;
     const canvas = canvasRef.current;

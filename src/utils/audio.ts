@@ -2,6 +2,7 @@
 
 /** Cathedral bells and warm brass-like swells, synthesized locally after a gesture. */
 class SoundManager {
+  // 오디오 그래프와 음소거 선호, 재생 중인 소스의 생명주기를 보관한다.
   private ctx: AudioContext | null = null;
   private master: GainNode | null = null;
   private dry: GainNode | null = null;
@@ -33,6 +34,7 @@ class SoundManager {
     for (const source of this.sources) { try { source.stop(); } catch {} }
     this.sources.clear();
   }
+  // 사용자 동작 뒤 오디오 그래프를 한 번 만들고 공명·압축 처리 경로를 연결한다.
   private initCtx() {
     if (!this.ctx) {
       const Constructor = window.AudioContext || (window as unknown as { webkitAudioContext?: typeof AudioContext }).webkitAudioContext;
@@ -62,6 +64,7 @@ class SoundManager {
     }
     if (this.ctx.state === 'suspended') void this.ctx.resume().catch(() => {});
   }
+  // 개별 발성 및 주파수 상승 발성을 공통 오디오 그래프에 연결한다.
   private voice(frequency: number, time: number, duration: number, volume: number, type: OscillatorType = 'sine', pan = 0, attack = .025) {
     if (!this.ctx || !this.dry || !this.wet) return;
     const ctx = this.ctx;
@@ -76,6 +79,23 @@ class SoundManager {
     oscillator.onended = () => { oscillator.disconnect(); gain.disconnect(); stereo.disconnect(); this.sources.delete(oscillator); };
     oscillator.start(time); oscillator.stop(time + duration + .02);
   }
+  private chirp(startFrequency: number, endFrequency: number, time: number, duration: number, volume: number, pan = 0) {
+    if (!this.ctx || !this.dry || !this.wet) return;
+    const ctx = this.ctx;
+    const oscillator = ctx.createOscillator(), gain = ctx.createGain(), stereo = ctx.createStereoPanner();
+    oscillator.type = 'sine';
+    oscillator.frequency.setValueAtTime(startFrequency, time);
+    oscillator.frequency.exponentialRampToValueAtTime(endFrequency, time + duration * .75);
+    gain.gain.setValueAtTime(.0001, time);
+    gain.gain.exponentialRampToValueAtTime(volume, time + .012);
+    gain.gain.exponentialRampToValueAtTime(.0001, time + duration);
+    stereo.pan.value = pan;
+    oscillator.connect(gain); gain.connect(stereo); stereo.connect(this.dry); stereo.connect(this.wet);
+    this.sources.add(oscillator);
+    oscillator.onended = () => { oscillator.disconnect(); gain.disconnect(); stereo.disconnect(); this.sources.delete(oscillator); };
+    oscillator.start(time); oscillator.stop(time + duration + .02);
+  }
+  // 상호작용 종류별로 종소리·마법 화음·새소리 합성을 선택한다.
   playChime(type: Chime = 'sparkle') {
     if (!this.enabled || document.hidden || performance.now() - this.lastPlayed < 160) return;
     try {
@@ -84,18 +104,18 @@ class SoundManager {
       this.lastPlayed = performance.now();
       const now = this.ctx.currentTime + .015;
       if (type === 'page') {
-        // Low D bell with slightly inharmonic bronze overtones and a distant fifth.
-        [[146.83, .18, 1.5], [293.66, .08, 1.1], [440, .05, 1.3], [602, .022, .8]].forEach(([hz, gain, duration], i) => this.voice(hz, now + i * .018, duration, gain, 'sine', (i % 2 ? 1 : -1) * .28));
-        this.voice(73.42, now, .9, .1, 'sine', 0, .06);
+        // A brief struck bronze bell with softly detuned upper partials.
+        [[392, .12, .72], [785, .045, .58], [1178, .018, .42], [1760, .008, .3]].forEach(([hz, gain, duration], i) => this.voice(hz, now + i * .006, duration, gain, 'sine', (i % 2 ? 1 : -1) * .2, .008));
       } else if (type === 'lumos') {
-        // Slow, warm open-fifth fanfare with an airy upper bell.
-        [146.83, 220, 293.66, 440].forEach((hz, i) => this.voice(hz, now + i * .075, 1.8, .045, 'triangle', (i - 1.5) * .22, .18));
-        this.voice(73.42, now, 1.9, .12, 'sine', 0, .1);
-        this.voice(880, now + .22, 1.6, .04, 'sine', .35, .06);
+        // A rising, warm chord with a few bright sparkles for a magical flourish.
+        [261.63, 329.63, 392, 523.25].forEach((hz, i) => this.voice(hz, now + i * .055, .85, .038, 'triangle', (i - 1.5) * .2, .045));
+        this.voice(1046.5, now + .2, .5, .025, 'sine', .35, .025);
+        this.chirp(1318.5, 1760, now + .28, .22, .018, -.3);
       } else {
-        // A restrained constellation of bells above the same low tonal foundation.
-        [293.66, 440, 587.33, 880].forEach((hz, i) => this.voice(hz, now + i * .09, 1.3, .055 - i * .007, 'sine', (i - 1.5) * .3));
-        this.voice(146.83, now, 1.4, .075, 'sine', 0, .06);
+        // Two light, upward bird-like calls, synthesized without an audio asset.
+        this.chirp(1568, 2093, now, .16, .055, -.2);
+        this.chirp(1760, 2349, now + .12, .17, .045, .2);
+        this.chirp(2093, 1760, now + .28, .15, .035, 0);
       }
     } catch { /* Browsers without audio support keep all navigation usable. */ }
   }

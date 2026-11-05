@@ -1,7 +1,7 @@
-/* A printed student folio for the portraits. The home page and header live in moonlit.css. */
+/* 메인·헤더와 분리된 인물 기록의 고서풍 종이 테마 */
 :root { --paper: #eae4d6; }
 
-/* A separate printed visual language for the student archive. */
+/* 기숙사별 종이색, 프로필 구성, 상세 기록과 반응형 배치 */
 body:has(.parchment-profile) .smoke-veil { display: none; }
 .parchment-profile.character-chronicle { background: var(--paper); color: #30392f; --folio-accent: #78443d; --house-metal: var(--folio-accent); --house-text: var(--folio-accent); }
 .parchment-profile[data-house="slytherin"] { --folio-accent: #356657; --paper: #e3e8dd; }
@@ -38,7 +38,7 @@ body:has(.parchment-profile) .smoke-veil { display: none; }
 .parchment-profile .notes-heading { text-align: left; display: grid; grid-template-columns: 1fr 1fr; gap: 18px; margin-bottom: 45px; }.parchment-profile .notes-heading .small-caps { grid-column: 1/-1; }.parchment-profile .notes-heading h2 { color: #344135; margin: 0; font-size: 28px; }.dossier-handwriting { text-align: right; align-self: end; font-family: var(--font-garamond); font-size: 24px; font-style: italic; color: #7d856e; }
 .parchment-profile .notes-columns { gap: 5vw; grid-template-columns: 1fr 1.4fr 1fr; }.parchment-profile .notes-columns article { border-top: 3px double #68745e55; padding-top: 25px; }.parchment-profile .notes-columns h3 { color: var(--folio-accent); font-size: 17px; }.parchment-profile .notes-columns p,.parchment-profile .notes-columns li,.parchment-profile .notes-columns dd { color: #515e4b; font-size: 12px; line-height: 2.2; }.parchment-profile .notes-columns dt { color: #7b816c; }
 .dossier-colophon { margin: 0 5vw; border-top: 1px solid #68745e55; padding: 30px 0; display: flex; justify-content: space-between; gap: 25px; align-items: center; color: #607057; font-size: 10px; }.dossier-colophon > span { font-family: var(--font-cinzel); letter-spacing: .15em; font-size: 9px; }.dossier-colophon button { display: flex; gap: 12px; align-items: center; cursor: pointer; }
-/* The directory shares the archive's quiet, square-edged typography. */
+/* 명부에도 기록 화면의 절제된 사각형 서체와 테마를 이어 쓴다. */
 .house-directory { padding-top: 20px; }.house-directory .directory-heading h2 { font-family: var(--font-korean); font-weight: 400; letter-spacing: -.04em; }.house-directory [class*="rounded"] { border-radius: 0; }.house-directory .house-student-card { border: 0 !important; border-bottom: 1px solid var(--house-metal) !important; background: #12252a; box-shadow: none; }.house-directory .house-student-card:hover { transform: translateY(-5px); }
 :is(.house-selection-rail button,.dossier-colophon button,.enchanted-frame):focus-visible { outline: 2px solid #9dad88; outline-offset: 5px; }
 @media(min-width:761px) and (max-width:1100px) { .dossier-composition { grid-template-columns: minmax(0,1fr) minmax(0,1.3fr); gap: 30px; }.parchment-profile .profile-personality { grid-column: 1/-1; display: grid; grid-template-columns: 1fr 1.4fr; gap: 16px 30px; border-top: 1px solid #68745e55; padding-top: 30px; }.parchment-profile .profile-personality h2 { margin: 0; }.parchment-profile .profile-personality .personality-prose { grid-column: 2; grid-row: 1/5; }.parchment-profile .profile-personality blockquote { margin: 0; }.parchment-profile .profile-center .enchanted-frame { height: 520px; } }

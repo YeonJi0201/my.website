@@ -1,8 +1,9 @@
-﻿/* Four heraldic palettes, shared across the directory, banners and chronicle. */
+/* 기숙사별 색상 토큰과 문장, 배너·프로필·명부에 공유하는 테마 */
 [data-house="gryffindor"] { --house-rgb: 138,34,39; --house-metal: #d3ad67; --house-ink: #351317; --house-text: #e3c997; }
 [data-house="slytherin"] { --house-rgb: 28,100,73; --house-metal: #b7c6bd; --house-ink: #10261f; --house-text: #c4d6ca; }
 [data-house="ravenclaw"] { --house-rgb: 39,69,122; --house-metal: #bf916d; --house-ink: #121d36; --house-text: #d4c2ac; }
 [data-house="hufflepuff"] { --house-rgb: 162,119,34; --house-metal: #d3b65f; --house-ink: #302814; --house-text: #e0cf99; }
+/* 기숙사 문장과 프로필 초상화·명부 카드의 테마별 표현 */
 .house-emblem { display: block; width: 76px; height: 89px; flex-shrink: 0; color: var(--house-metal,#c9b482); }
 .banner-emblem { width: 92px; height: 107px; margin: 23px auto; }
 .house-banner[data-house] { background: repeating-linear-gradient(90deg,#0000 0 2px,#00000016 2px 3px),linear-gradient(180deg,rgba(var(--house-rgb),.5),#0c1215 93%); border-color: var(--house-metal); }
@@ -39,6 +40,7 @@
 .house-student-card .character-portrait img { mask-image: none; -webkit-mask-image: none; }
 .house-student-card [class*="top-3"][class*="right-3"] { display: flex; align-items: center; gap: 7px; border-radius: 0; }
 .house-student-card .house-emblem { width: 22px; height: 27px; }
+/* 관리자 초상화 크롭 조절 폼 */
 .crop-controls { width: 100%; max-width: 240px; margin-top: 24px; border-top: 1px solid #a28a5544; padding-top: 12px; color: #b6aa91; }
 .crop-controls legend { padding-top: 12px; font-size: 12px; color: #dbc798; }.crop-controls p { font-size: 10px; line-height: 1.8; margin: 8px 0 15px; }
 .crop-controls label { display: block; font-size: 11px; margin: 13px 0; }.crop-controls output { float: right; }.crop-controls input { display: block; width: 100%; margin-top: 9px; accent-color: #ba9d60; }.crop-controls button { font-size: 10px; text-decoration: underline; text-underline-offset: 4px; cursor: pointer; margin-top: 5px; }

@@ -1,5 +1,6 @@
 // Hand-set linework for the home hero and header. Coordinates follow the approved comp (1672 × 941).
 
+// 반복해서 쓰는 SVG 반짝임 도형과 장식 요소를 아래 그림 구성에서 공유한다.
 const SPARK = 'M0-7C.55-1.05 1.05-.55 7 0 1.05.55.55 1.05 0 7-.55 1.05-1.05.55-7 0-1.05-.55-.55-1.05 0-7Z';
 
 export function Sparkle({ className }: { className?: string }) {
@@ -22,6 +23,7 @@ const ray = (length: number, width: number, angle: number, key: string) => <g ke
 </g>;
 
 export function HeroFlourish() {
+  // 메인 타이틀 주위의 궤도, 나침반 별과 반짝임을 벡터로 그린다.
   return <svg className="hero-flourish" viewBox="80 220 600 290" aria-hidden="true" focusable="false">
     <defs>
       <linearGradient id="hero-swirl" gradientUnits="userSpaceOnUse" x1="140" y1="450" x2="620" y2="270">

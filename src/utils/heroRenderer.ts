@@ -2,6 +2,7 @@
 // One plate plus a packed data map (R: depth, near = bright · G: where clouds may drift · B: lake mist)
 // is enough for a 2.5D camera move on arrival, drifting clouds, mist and a breathing lantern.
 
+// 전체 화면 사각형을 좌표 변환 없이 그리는 정점 셰이더다.
 const VERTEX = `
 attribute vec2 aPos;
 varying vec2 vUv;
@@ -10,6 +11,7 @@ void main() {
   gl_Position = vec4(aPos, 0., 1.);
 }`;
 
+// 이미지·깊이 맵을 샘플링해 카메라 이동, 구름·안개·등불과 별똥별을 합성한다.
 const FRAGMENT = `
 #ifdef GL_FRAGMENT_PRECISION_HIGH
 precision highp float;
@@ -124,6 +126,7 @@ export interface HeroRenderer {
   dispose(): void;
 }
 
+// WebGL 자원과 셰이더를 만들고, 입력 변화에 반응하는 애니메이션 렌더러를 반환한다.
 export function createHeroRenderer(canvas: HTMLCanvasElement, image: HTMLImageElement, data: HTMLImageElement, onLost: () => void): HeroRenderer | null {
   const gl = canvas.getContext('webgl', { alpha: false, antialias: false, depth: false, stencil: false, premultipliedAlpha: false, powerPreference: 'low-power' });
   if (!gl) return null;
@@ -180,6 +183,7 @@ export function createHeroRenderer(canvas: HTMLCanvasElement, image: HTMLImageEl
   gl.uniform2f(u.imageSize, image.naturalWidth, image.naturalHeight);
   gl.uniform1f(u.focusDepth, .12);
 
+  // 포인터·스크롤·별똥별 상태를 프레임마다 보간해 장면 셰이더에 전달한다.
   let elapsed = 0, last = 0, frame = 0, running = false, disposed = false;
   const pointer = { x: 0, y: 0, tx: 0, ty: 0 };
   const scroll = { value: 0, target: 0 };
@@ -223,6 +227,7 @@ export function createHeroRenderer(canvas: HTMLCanvasElement, image: HTMLImageEl
     gl.drawArrays(gl.TRIANGLES, 0, 3);
   };
 
+  // 애니메이션 생명주기와 캔버스 크기·입력·WebGL 자원 해제를 외부 API로 제공한다.
   const tick = (now: number) => {
     const dt = Math.min((now - last) / 1000, .1);
     last = now;

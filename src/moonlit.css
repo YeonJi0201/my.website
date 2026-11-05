@@ -17,12 +17,18 @@
 ::selection { background: rgba(201, 169, 107, .32); color: #fff3d6; }
 :focus-visible { outline-color: #d9bf88; }
 
-/* ---------- header ---------- */
+/* ---------- 상단 내비게이션과 스크롤 상태 ---------- */
 .site-header {
   border-bottom: 0;
   background: rgba(14, 15, 17, .9) !important;
   backdrop-filter: blur(14px);
-  transition: background-color .6s ease, backdrop-filter .6s ease;
+  transition: transform .3s ease, opacity .3s ease, background-color .6s ease, backdrop-filter .6s ease, visibility .3s;
+}
+.site-header.is-idle {
+  transform: translateY(-110%);
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
 }
 .site-header.is-overlay { margin-bottom: calc(var(--header-h) * -1); }
 .site-header.is-over-hero { background: transparent !important; backdrop-filter: none; }
@@ -126,7 +132,7 @@
   box-shadow: 0 0 6px rgba(236, 212, 156, .45);
 }
 
-/* ---------- home painting ---------- */
+/* ---------- 메인 히어로 배경과 제목 ---------- */
 .nocturne-home { background: var(--moon-ink); color: var(--moon-text); }
 .moonlit-hero {
   position: relative;
@@ -205,6 +211,7 @@
   -webkit-text-fill-color: transparent;
 }
 
+/* 제목 보조 문구, 장식 구분선과 명부 진입 버튼 */
 .moonlit-tagline {
   display: flex;
   flex-direction: column;
@@ -252,6 +259,7 @@
 .moonlit-enter:focus-visible { outline: none; }
 .moonlit-enter:focus-visible .moonlit-enter-frame { filter: brightness(1.25) drop-shadow(0 0 5px rgba(243, 220, 169, .6)); }
 
+/* 히어로 우측 인용문과 하단 스크롤 안내 */
 .moonlit-epigraph {
   position: absolute;
   z-index: 2;
@@ -297,7 +305,7 @@
 .hero-scroll-cue { width: max(11px, calc(var(--u) * 14)); height: max(56px, calc(var(--u) * 72)); margin-left: -.3em; overflow: visible; color: var(--moon-gold); }
 .scroll-cue-glint { opacity: 0; }
 
-/* ---------- chapter rail ---------- */
+/* ---------- 고정 장별 목차 ---------- */
 .chapter-rail { position: fixed; z-index: 30; left: clamp(14px, calc(var(--u) * 33), 56px); bottom: 12.5vh; }
 .chapter-rail ol { position: relative; display: flex; flex-direction: column; margin: 0; padding: 0; list-style: none; }
 .chapter-rail ol::before { content: ''; position: absolute; left: 23px; top: 10px; bottom: 10px; width: 1px; background: linear-gradient(rgba(201, 169, 107, 0), rgba(201, 169, 107, .5) 18%, rgba(201, 169, 107, .5) 82%, rgba(201, 169, 107, 0)); }
@@ -313,7 +321,7 @@
 .chapter-rail a:focus-visible { outline: none; }
 .chapter-rail a:focus-visible .chapter-rail-mark { outline: 1px solid #e0c690; outline-offset: 2px; border-radius: 50%; }
 
-/* ---------- the chapters below, in the painting's palette ---------- */
+/* ---------- 세계관·기숙사·시스템·시간표 장의 야간 팔레트 ---------- */
 body:has(.nocturne-home) .smoke-veil { opacity: .22; }
 .nocturne-home :is(p, h2, h3, li, blockquote, dd) { word-break: keep-all; overflow-wrap: break-word; }
 .nocturne-home .story-section h2 { text-wrap: balance; }
@@ -354,7 +362,7 @@ body:has(.nocturne-home) .smoke-veil { opacity: .22; }
 .nocturne-home .archive-footer { border-top: 1px solid rgba(201, 169, 107, .18); background: #0c0d0f; }
 .nocturne-home .footer-wordmark { color: #e3d0a8; }
 
-/* ---------- student roster (CHARACTER) ---------- */
+/* ---------- 기숙사 필터·검색·학년 선택이 있는 학생 명부 ---------- */
 body:has(.roster) #root > div { background-color: var(--moon-ink); }
 body:has(.roster) .smoke-veil { opacity: .3; }
 .roster { max-width: 1280px; margin: 0 auto; padding: 40px clamp(20px, 5vw, 64px) 140px; color: var(--moon-text); }
@@ -402,7 +410,7 @@ body:has(.roster) .smoke-veil { opacity: .3; }
 .roster-empty button { margin-top: 18px; padding: 8px 0; border-bottom: 1px solid var(--moon-gold); color: #e3cd9c; cursor: pointer; }
 .roster-empty button:hover { color: #f6e6c0; }
 
-/* ---------- arrival choreography (only when motion is welcome) ---------- */
+/* ---------- 동작 허용 시에만 재생하는 히어로 등장 효과 ---------- */
 @media (prefers-reduced-motion: no-preference) {
   .hero-scene[data-mode="still"][data-intro="on"] .hero-scene-still { animation: moonlitStill 3.4s cubic-bezier(.16, 1, .3, 1) both; }
   .moonlit-hero[data-ready="false"] :is(.moonlit-title, .moonlit-tagline, .moonlit-divider, .moonlit-enter, .moonlit-epigraph, .moonlit-scroll, .flourish-compass, .flourish-glint) { opacity: 0; }
@@ -508,4 +516,7 @@ body:has(.roster) .smoke-veil { opacity: .3; }
   .site-header nav a { font-size: 9.6px; letter-spacing: .06em; }
   .site-wordmark { font-size: 17px; }
   .site-wordmark .brand-crest { width: 56px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .site-header { transition: none; }
 }

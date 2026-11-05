@@ -22,6 +22,7 @@ export const CharacterModal: React.FC<CharacterModalProps> = ({
   initialCharacter,
   defaultHouse = 'gryffindor',
 }) => {
+  // 폼 입력값을 캐릭터 데이터 필드와 일대일로 보관한다.
   const [nameKo, setNameKo] = useState('');
   const [saving, setSaving] = useState(false);
   const [saveError, setSaveError] = useState('');
@@ -35,7 +36,7 @@ export const CharacterModal: React.FC<CharacterModalProps> = ({
   const [birthday, setBirthday] = useState('10월 24일');
   const [bloodStatus, setBloodStatus] = useState<'순수혈통' | '혼혈' | '머글태생'>('혼혈');
 
-  // Wand
+  // 지팡이와 마법 설정 입력값
   const [wandWood, setWandWood] = useState('마가목');
   const [wandCore, setWandCore] = useState('불사조 깃털');
   const [wandLength, setWandLength] = useState('11.5인치');
@@ -60,7 +61,7 @@ export const CharacterModal: React.FC<CharacterModalProps> = ({
 
   const fileInputRef = useRef<HTMLInputElement | null>(null);
 
-  // Populate state when editing or opening
+  // 편집 대상 또는 새 캐릭터의 기본값으로 폼 상태를 초기화한다.
   useEffect(() => {
     setSaveError('');
     if (initialCharacter) {
@@ -92,7 +93,7 @@ export const CharacterModal: React.FC<CharacterModalProps> = ({
       setPositionOrClub(initialCharacter.positionOrClub || '');
       setTriviaInput((initialCharacter.trivia || []).join('\n'));
     } else {
-      // Default placeholder
+      // 신규 등록용 기본값
       setNameKo('');
       setNameEn('');
       setHouse(defaultHouse);
@@ -123,7 +124,7 @@ export const CharacterModal: React.FC<CharacterModalProps> = ({
     }
   }, [initialCharacter, defaultHouse, isOpen]);
 
-  // Handle PNG Upload
+  // 선택한 이미지를 미리보기 가능한 데이터 URL로 읽고 크롭 설정을 초기화한다.
   const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
@@ -140,6 +141,7 @@ export const CharacterModal: React.FC<CharacterModalProps> = ({
     reader.readAsDataURL(file);
   };
 
+  // 입력 문자열을 목록 데이터로 정리하고 저장 성공·실패와 중복 제출을 처리한다.
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (saving) return;
@@ -201,6 +203,7 @@ export const CharacterModal: React.FC<CharacterModalProps> = ({
 
   if (!isOpen) return null;
 
+  // 이미지 크롭, 기본 정보, 마법 설정과 서사를 한 편집 폼으로 제공한다.
   return (
     <AnimatePresence>
       <div className="fixed inset-0 z-50 overflow-y-auto bg-black/85 backdrop-blur-md flex items-center justify-center p-3 sm:p-6 custom-scrollbar">
@@ -210,7 +213,7 @@ export const CharacterModal: React.FC<CharacterModalProps> = ({
           exit={{ opacity: 0, scale: 0.95, y: 20 }}
           className="relative w-full max-w-4xl bg-[#090d16] border border-[#d4a33e]/30 rounded-2xl shadow-2xl overflow-hidden my-8"
         >
-          {/* Header */}
+          {/* 편집 모달 제목과 닫기 동작 */}
           <div className="px-6 py-5 border-b border-[#d4a33e]/20 flex items-center justify-between bg-[#0e1422]">
             <div className="flex items-center gap-2.5">
               <Sparkles className="w-5 h-5 text-[#f5d064]" />
@@ -226,12 +229,12 @@ export const CharacterModal: React.FC<CharacterModalProps> = ({
             </button>
           </div>
 
-          {/* Form */}
+          {/* 저장 상태와 입력 섹션을 포함한 전체 편집 폼 */}
           <form aria-busy={saving} onSubmit={handleSubmit} className="p-6 space-y-6 max-h-[75vh] overflow-y-auto custom-scrollbar">
             {saveError && <p role="alert" className="admin-error">{saveError}</p>}
-            {/* Top Grid: Portrait PNG Upload & Basic Bio */}
+            {/* 초상화 업로드·크롭 및 기숙사·기본 인물 정보 */}
             <div className="grid grid-cols-1 md:grid-cols-12 gap-6">
-              {/* Left Column: Image PNG Preview & Upload */}
+              {/* 이미지 미리보기, 파일 업로드, 확대·위치 크롭 조정 */}
               <div className="md:col-span-4 flex flex-col items-center">
                 <label className="text-xs font-cinzel font-bold text-[#d4a33e] uppercase mb-2 self-start">
                   Character Portrait (외관 PNG)
@@ -273,9 +276,9 @@ export const CharacterModal: React.FC<CharacterModalProps> = ({
                 </fieldset>
               </div>
 
-              {/* Right Column: Name & House & Basic Attributes */}
+              {/* 기숙사, 신체 정보, 이름, 학년과 혈통 등 기본 프로필 */}
               <div className="md:col-span-8 space-y-4">
-                {/* House Selection */}
+                {/* 기숙사 선택 */}
                 <div>
                   <label className="block text-xs font-cinzel font-bold text-[#d4a33e] uppercase mb-1.5">
                     Hogwarts House (기숙사 선택)
@@ -312,7 +315,7 @@ export const CharacterModal: React.FC<CharacterModalProps> = ({
                     <label className="block text-xs text-[#a19d94]">키 (cm)<input type="number" min="1" max="300" step="0.1" value={height} onChange={e => setHeight(e.target.value)} placeholder="미등록" className="w-full mt-2 p-2 border border-[#d4a33e]/30 bg-[#0c121e] text-[#e8e4dc]" /></label>
                     <label className="block text-xs text-[#a19d94]">몸무게 (kg)<input type="number" min="1" max="500" step="0.1" value={weight} onChange={e => setWeight(e.target.value)} placeholder="미등록" className="w-full mt-2 p-2 border border-[#d4a33e]/30 bg-[#0c121e] text-[#e8e4dc]" /></label>
                   </div>
-                {/* Name Inputs */}
+                {/* 한글·영문 이름 */}
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                   <div>
                     <label className="block text-xs text-[#a19d94] mb-1">한글 이름 *</label>
@@ -337,7 +340,7 @@ export const CharacterModal: React.FC<CharacterModalProps> = ({
                   </div>
                 </div>
 
-                {/* Gender, Age, Year, Blood */}
+                {/* 성별, 나이, 학년과 혈통 */}
                 <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
                   <div>
                     <label className="block text-xs text-[#a19d94] mb-1">성별</label>
@@ -412,7 +415,7 @@ export const CharacterModal: React.FC<CharacterModalProps> = ({
               </div>
             </div>
 
-            {/* Wand Information */}
+            {/* 지팡이 목재·심·길이·유연성 */}
             <div className="p-4 rounded-xl bg-[#0e1422] border border-[#d4a33e]/20 space-y-3">
               <div className="flex items-center gap-2 text-xs font-cinzel font-bold text-[#f5d064]">
                 <Wand2 className="w-3.5 h-3.5" />
@@ -462,7 +465,7 @@ export const CharacterModal: React.FC<CharacterModalProps> = ({
               </div>
             </div>
 
-            {/* Patronus, Boggart, Specialty */}
+            {/* 패트로누스, 보가트와 특기 과목 */}
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
               <div>
                 <label className="block text-xs text-[#a19d94] mb-1">패트로누스 (Patronus)</label>
@@ -496,7 +499,7 @@ export const CharacterModal: React.FC<CharacterModalProps> = ({
               </div>
             </div>
 
-            {/* Representative Quote */}
+            {/* 대표 대사 */}
             <div>
               <label className="block text-xs text-[#a19d94] mb-1">대표 대사 (Quote)</label>
               <input
@@ -508,7 +511,7 @@ export const CharacterModal: React.FC<CharacterModalProps> = ({
               />
             </div>
 
-            {/* Appearance Summary & Detail */}
+            {/* 외관 요약과 상세 묘사 */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <div>
                 <label className="block text-xs text-[#a19d94] mb-1">외관 요약 (한 줄 묘사)</label>
@@ -532,7 +535,7 @@ export const CharacterModal: React.FC<CharacterModalProps> = ({
               </div>
             </div>
 
-            {/* Personality Tags & Personality Detail */}
+            {/* 성격 키워드와 상세 서술 */}
             <div className="space-y-3">
               <div>
                 <label className="block text-xs text-[#a19d94] mb-1">성격 키워드 (쉼표 구분)</label>
@@ -556,7 +559,7 @@ export const CharacterModal: React.FC<CharacterModalProps> = ({
               </div>
             </div>
 
-            {/* Background Story */}
+            {/* 과거사와 성장 배경 */}
             <div>
               <label className="block text-xs text-[#a19d94] mb-1">과거사 및 가문/성장 배경 (Background)</label>
               <textarea
@@ -568,7 +571,7 @@ export const CharacterModal: React.FC<CharacterModalProps> = ({
               />
             </div>
 
-            {/* Trivia / TMI (newline separated) */}
+            {/* 한 줄씩 입력하는 기타 특징 */}
             <div>
               <label className="block text-xs text-[#a19d94] mb-1">기타 특징 / TMI (한 줄에 하나씩 입력)</label>
               <textarea
@@ -580,7 +583,7 @@ export const CharacterModal: React.FC<CharacterModalProps> = ({
               />
             </div>
 
-            {/* Action Buttons */}
+            {/* 취소와 등록·수정 저장 동작 */}
             <div className="pt-4 border-t border-[#d4a33e]/20 flex items-center justify-end gap-3">
               <button
                 type="button"

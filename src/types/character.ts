@@ -1,3 +1,5 @@
+// 기숙사·지팡이·인물 프로필과 화면 설정이 공유하는 데이터 계약을 정의한다.
+// 기숙사·지팡이·인물 프로필과 화면 설정이 공유하는 데이터 계약을 정의한다.
 export type HouseType = 'gryffindor' | 'slytherin' | 'ravenclaw' | 'hufflepuff';
 
 export interface WandInfo {

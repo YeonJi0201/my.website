@@ -1,4 +1,4 @@
-﻿/* A character introduction stage, framed as an illuminated medieval chronicle. */
+/* 조명된 연대기 무대, 프로필 정보, 초상화 선택 레일과 반응형 배치 */
 .cinematic-profile { min-height: calc(100svh - 80px); padding: 26px max(35px,4vw) 24px; display: flex; flex-direction: column; isolation: isolate; }
 .cinematic-profile .castle-backdrop { object-position: 50% 30%; filter: saturate(.35) brightness(.46); }
 .cinematic-profile .castle-shade { background: linear-gradient(180deg,#080d1470,transparent 35%,#0a1114 99%),linear-gradient(90deg,var(--house-ink),rgba(var(--house-rgb),.12) 48%,var(--house-ink)); }
@@ -14,6 +14,7 @@
 .house-selection-rail .house-emblem { width: 51px; height: 59px; background: #0b111566; }
 .house-selection-rail button > span { display: block; font-size: 9px; color: var(--house-metal); margin-top: 5px; text-align: center; }
 .house-selection-rail button.is-current::after { content: '◆'; position: absolute; top: 23px; left: -15px; font-size: 8px; color: var(--house-metal); }
+/* 기숙사 선택, 이름·성격 정보와 중앙 초상화를 세 열로 나눈다. */
 .cinematic-profile .profile-composition { position: relative; z-index: 2; width: calc(100% - 85px); margin: 36px 0 0 85px; max-width: none; flex: 1; grid-template-columns: minmax(210px,1fr) minmax(360px,1.65fr) minmax(210px,1fr); gap: clamp(20px,2.5vw,45px); align-items: center; }
 .cinematic-profile .profile-center { align-self: end; max-width: 680px; }
 .cinematic-profile .profile-center .enchanted-frame { height: clamp(490px,61svh,720px); aspect-ratio: auto; }
@@ -27,6 +28,7 @@
 .cinematic-profile .profile-personality h2 { margin: 18px 0 20px; }
 .cinematic-profile .personality-prose { font-size: 13px; line-height: 2.15; }
 .cinematic-profile .profile-crest-watermark { top: -4%; opacity: .15; transform: scale(1.16); }
+/* 프로필 아래 캐릭터 초상화 선택 레일과 썸네일 */
 .character-selection-dock { position: relative; width: min(760px,80%); z-index: 4; align-self: center; margin: 0 auto; padding: 14px 20px 0; border-top: 1px solid #b6a57a55; }
 .character-selection-dock::before { content: '◆'; position: absolute; top: -8px; left: 50%; transform: translateX(-50%); font-size: 10px; color: var(--house-metal); background: #0a1114; padding: 0 12px; }
 .selection-dock-heading { display: flex; align-items: center; justify-content: space-between; gap: 15px; margin-bottom: 16px; }

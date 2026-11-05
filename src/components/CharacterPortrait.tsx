@@ -10,6 +10,7 @@ export function CharacterPortrait({ character, className = '' }: {
   character: Pick<Character, 'image' | 'nameKo' | 'portraitCrop'>;
   className?: string;
 }) {
+  // 뷰포트 크기·원본 이미지 치수·가능한 경우 얼굴 위치를 모아 상반신 크롭을 계산한다.
   const viewport = useRef<HTMLDivElement>(null);
   const picture = useRef<HTMLImageElement>(null);
   const [size, setSize] = useState({ width: 400, height: 500 });
@@ -45,6 +46,7 @@ export function CharacterPortrait({ character, className = '' }: {
   const top = face ? Math.max(0, face.y - face.height * .45) : 0;
   const left = Math.min(0, Math.max(size.width - natural.width * scale, size.width / 2 - center * scale + (crop?.x ?? 0) / 100 * size.width));
   const offsetTop = Math.min(0, Math.max(size.height - natural.height * scale, -top * scale + (crop?.y ?? 0) / 100 * size.height));
+  // 계산한 배율과 위치를 이미지에 적용해 여러 화면에서 같은 초상화 구도를 재사용한다.
   return <div className={`character-portrait ${className}`} ref={viewport}>
     <img ref={picture} src={resolvePortrait(character.image)} alt={character.nameKo} onLoad={event => setNatural({ width: event.currentTarget.naturalWidth, height: event.currentTarget.naturalHeight })} style={natural.width ? { width: natural.width * scale, height: natural.height * scale, left, top: offsetTop } : { width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'center top' }} />
   </div>;

@@ -1,5 +1,7 @@
+/* 전역 글꼴·기본 색상과 Tailwind 기반 스타일을 불러온다. */
 @import "tailwindcss";
 
+/* 문서 전반의 명조 타이포그래피와 기본 배경·본문 색을 지정한다. */
 @layer base {
   :root {
     --font-cinzel: 'Cinzel', serif;
@@ -22,7 +24,7 @@
   }
 }
 
-/* Custom magical keyframes & utilities */
+/* 공용 마법 효과 애니메이션과 금색 텍스트·스크롤바 유틸리티 */
 @keyframes magicalGlow {
   0%, 100% {
     filter: drop-shadow(0 0 15px rgba(212, 163, 62, 0.4)) drop-shadow(0 0 35px rgba(184, 134, 11, 0.2));

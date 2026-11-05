@@ -1,4 +1,4 @@
-/* Open character stage, stone tracery and printed chronicle typography. */
+/* 고성 장식과 구형 메인·캐릭터 프로필 화면의 공통 레이아웃 */
 .stone-tracery { color: #b8a575; }
 .story-home-stage { min-height: 870px; }
 .home-composition { align-items: center; margin-top: 5px; }
@@ -10,6 +10,7 @@
 .storybook-logo .logo-time { font: 78px var(--font-garamond); font-style: italic; }
 .storybook-logo > p { font-size: 11px; letter-spacing: .07em; line-height: 2; color: #c6b99c; margin: 12px -10px 0; }
 header button:first-child > span { font-family: var(--font-garamond); letter-spacing: -.02em; font-size: clamp(21px,2.5vw,32px); font-weight: 400; white-space: nowrap; }
+/* 캐릭터 프로필의 상단 내비게이션, 초상화와 좌우 소개 정보 */
 .profile-stage { min-height: 880px; padding-top: 32px; }
 .profile-toolbar { position: relative; display: flex; align-items: center; justify-content: space-between; gap: 20px; max-width: 1320px; margin: 0 auto; padding: 0 0 24px; border-bottom: 1px solid #ad956833; }
 .profile-toolbar button,.portrait-management button { display: inline-flex; gap: 10px; align-items: center; color: #c9b78e; font-size: 12px; cursor: pointer; padding: 8px 0; }

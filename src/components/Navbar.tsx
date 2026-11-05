@@ -20,9 +20,58 @@ const links = [
   { id: 'timetable', label: 'Timetable', korean: '시간표 안내' },
 ] as const;
 export function Navbar({ currentTab, onNavigate, soundEnabled, onToggleSound, overlay }: NavbarProps) {
+  // 아래 스크롤 중 헤더를 유지하고 정지·위 스크롤 시 숨기며, 최상단에서는 항상 표시한다.
   const header = useRef<HTMLElement>(null);
   const [overHero, setOverHero] = useState(overlay);
+  const [scrolling, setScrolling] = useState(() => window.scrollY <= 0);
   useEffect(() => {
+    let hideTimer = 0;
+    let previousScrollY = window.scrollY;
+    const clearHideTimer = () => window.clearTimeout(hideTimer);
+    const scheduleHide = () => {
+      clearHideTimer();
+      if (window.scrollY <= 0) {
+        setScrolling(true);
+        return;
+      }
+      hideTimer = window.setTimeout(() => {
+        if (!header.current?.contains(document.activeElement)) setScrolling(false);
+      }, 300);
+    };
+    const onScroll = () => {
+      const currentScrollY = window.scrollY;
+      if (currentScrollY <= 0) {
+        clearHideTimer();
+        setScrolling(true);
+      } else if (currentScrollY > previousScrollY) {
+        setScrolling(true);
+        scheduleHide();
+      } else if (currentScrollY < previousScrollY) {
+        clearHideTimer();
+        if (!header.current?.contains(document.activeElement)) setScrolling(false);
+      }
+      previousScrollY = currentScrollY;
+    };
+    const onFocusIn = (event: FocusEvent) => {
+      if (header.current?.contains(event.target as Node)) {
+        clearHideTimer();
+        setScrolling(true);
+      }
+    };
+    const onFocusOut = () => scheduleHide();
+
+    addEventListener('scroll', onScroll, { passive: true });
+    document.addEventListener('focusin', onFocusIn);
+    document.addEventListener('focusout', onFocusOut);
+    return () => {
+      clearHideTimer();
+      removeEventListener('scroll', onScroll);
+      document.removeEventListener('focusin', onFocusIn);
+      document.removeEventListener('focusout', onFocusOut);
+    };
+  }, []);
+  useEffect(() => {
+    // 메인 히어로 위에서는 투명 오버레이를 적용하고 벗어나면 불투명한 헤더로 전환한다.
     if (!overlay) { setOverHero(false); return; }
     const update = () => {
       const hero = document.getElementById('home');
@@ -37,7 +86,9 @@ export function Navbar({ currentTab, onNavigate, soundEnabled, onToggleSound, ov
   const navigate = (event: React.MouseEvent, target: NavigationTarget) => {
     event.preventDefault(); sound.playChime('page'); onNavigate(target);
   };
-  return <header ref={header} className={`site-header${overlay ? ' is-overlay' : ''}${overlay && overHero ? ' is-over-hero' : ''}`}>
+
+  // 로고, 장별 메뉴, 효과음 설정을 한 헤더에 배치한다.
+  return <header ref={header} className={`site-header${overlay ? ' is-overlay' : ''}${overlay && overHero ? ' is-over-hero' : ''}${scrolling ? '' : ' is-idle'}`}>
     <div className="site-header-inner">
       <a className="site-wordmark" href="#home" aria-label="Once Upon a time... 메인으로" onClick={event => navigate(event, 'home')}>
         <img className="brand-crest" src={crest} alt="" width={125} height={79} decoding="async" />

@@ -2,6 +2,7 @@
 import { motion, useReducedMotion, useScroll, useTransform } from 'motion/react';
 import castle from '../assets/images/utopia_castle_night_1791347657904.jpg';
 
+// 옛 메인 무대 레이아웃에서 사용하는 성 배경·장식 레이어와 자식 콘텐츠 래퍼다.
 export function FantasyStage({ children, className = '' }: { children: React.ReactNode; className?: string }) {
   const reduced = useReducedMotion();
   const { scrollY } = useScroll();

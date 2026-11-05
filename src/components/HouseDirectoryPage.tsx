@@ -24,14 +24,15 @@ export const HouseDirectoryPage: React.FC<HouseDirectoryPageProps> = ({
   onSelectCharacter,
   onBackToHome,
 }) => {
+  // 선택 기숙사·학년·검색어를 조합해 명부 항목을 필터링한다.
   const [searchTerm, setSearchTerm] = useState('');
-  const [yearFilter, setYearFilter] = useState<number | 'all'>('all');
+  const [yearFilter, setYearFilter] = useState<number | 'all' | 'other'>('all');
   const reduced = useReducedMotion();
 
   const query = searchTerm.trim().toLowerCase();
   const filteredCharacters = characters.filter((char) => {
     const matchesHouse = selectedHouse === 'all' || char.house === selectedHouse;
-    const matchesYear = yearFilter === 'all' || char.year === yearFilter;
+    const matchesYear = yearFilter === 'all' || (yearFilter === 'other' ? ![1, 4, 7].includes(char.year) : char.year === yearFilter);
     const matchesSearch =
       query === '' ||
       char.nameKo.toLowerCase().includes(query) ||
@@ -53,6 +54,7 @@ export const HouseDirectoryPage: React.FC<HouseDirectoryPageProps> = ({
     chooseHouse('all');
   };
 
+  // 기숙사 선택, 검색과 학년 필터, 결과 카드 및 빈 검색 결과를 렌더링한다.
   return (
     <div data-house={selectedHouse} className="roster">
       <button type="button" className="roster-back" onClick={() => { sound.playChime('page'); onBackToHome(); }}>
@@ -91,9 +93,10 @@ export const HouseDirectoryPage: React.FC<HouseDirectoryPageProps> = ({
           </label>
           <label className="roster-year">
             <span>학년</span>
-            <select value={yearFilter} onChange={(e) => setYearFilter(e.target.value === 'all' ? 'all' : Number(e.target.value))}>
+            <select value={yearFilter} onChange={(e) => setYearFilter(e.target.value === 'all' || e.target.value === 'other' ? e.target.value : Number(e.target.value))}>
               <option value="all">전체</option>
-              {[1, 2, 3, 4, 5, 6, 7].map((yr) => <option key={yr} value={yr}>{yr}학년</option>)}
+              {[1, 4, 7].map((yr) => <option key={yr} value={yr}>{yr}학년</option>)}
+              <option value="other">그 외</option>
             </select>
           </label>
         </div>

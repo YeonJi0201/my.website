@@ -11,7 +11,8 @@
     "lint": "tsc --noEmit",
     "admin:setup": "node scripts/create-admin.mjs",
     "start": "tsx server/index.ts",
-    "test:api": "node --import tsx --test server/api.test.ts"
+    "test:api": "node --import tsx --test server/*.test.ts",
+    "db:migrate": "tsx scripts/migrate-supabase.ts"
   },
   "dependencies": {
     "@google/genai": "^2.4.0",

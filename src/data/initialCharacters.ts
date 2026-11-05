@@ -1,5 +1,6 @@
 import type { Character } from '../types/character.ts';
 
+// 서버 저장소가 아직 없을 때 명부에 제공하는 예시 인물 프로필 모음이다.
 export const INITIAL_CHARACTERS: Character[] = [
   {
     id: 'char-gryffindor-valerie',

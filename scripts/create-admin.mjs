@@ -2,6 +2,7 @@ import { randomBytes, scryptSync } from 'node:crypto';
 import { readFile, writeFile } from 'node:fs/promises';
 import path from 'node:path';
 
+// 임의 관리자 비밀번호를 생성해 환경 파일에는 해시만, 무시 대상 로컬 파일에는 접속 정보를 저장한다.
 const root = process.cwd();
 const envFile = path.join(root, '.env.local');
 let existing = '';
@@ -14,6 +15,7 @@ const username = 'admin';
 const password = randomBytes(18).toString('base64url');
 const salt = randomBytes(16).toString('hex');
 const hash = scryptSync(password, salt, 64).toString('hex');
+// 기존의 다른 환경 설정은 유지하면서 관리자 설정 항목만 교체한다.
 const preserved = existing.split(/\r?\n/).filter(line => !/^ADMIN_(USERNAME|PASSWORD_HASH)=/.test(line)).join('\n').trimEnd();
 await writeFile(envFile, `${preserved}\nADMIN_USERNAME=${username}\nADMIN_PASSWORD_HASH=${salt}:${hash}\n`, { mode: 0o600 });
 const accessFile = path.join(root, '.admin-access.local.txt');

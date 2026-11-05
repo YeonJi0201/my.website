@@ -1,5 +1,6 @@
 import { HouseConfig, HouseType } from '../types/character';
 
+// 네 기숙사의 이름·상징·가치와 UI에서 공유하는 색상 토큰을 정의한다.
 export const HOUSES: Record<HouseType, HouseConfig> = {
   gryffindor: {
     id: 'gryffindor',
