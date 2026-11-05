@@ -1,3 +1,4 @@
+import { prepareImageUpload } from '../utils/prepare-image-upload';
 import { MAX_IMAGE_BYTES } from '../utils/image-limits';
 import { formatSchoolYear } from '../utils/registration-fields';
 import { useEffect, useRef, useState } from 'react';
@@ -26,7 +27,7 @@ export default function AdminPage({ characters, onCharactersChange }: Props) {
   const imageTarget = useRef<Character | null>(null);
   useEffect(() => {
     let active = true;
-    api<{ authenticated: boolean }>('/api/admin/session').then(session => { if (active) setStatus(session.authenticated ? 'admin' : 'guest'); }).catch(() => { if (active) { setStatus('guest'); setError('인증 서버에 연결하지 못했습니다.'); } });
+    api<{ authenticated: boolean }>('/api/admin/session').then(session => { if (active) setStatus(session.authenticated ? 'admin' : 'guest'); }).catch(error => { if (active) { setStatus('guest'); setError(error instanceof Error ? error.message : '인증 서버에 연결하지 못했습니다.'); } });
     try { const old = JSON.parse(localStorage.getItem('utopia_hogwarts_characters_v1') || 'null'); if (Array.isArray(old)) setLegacyCount(old.length); } catch {}
     return () => { active = false; };
   }, []);
@@ -51,8 +52,9 @@ export default function AdminPage({ characters, onCharactersChange }: Props) {
   };
   const save = async (character: Character) => {
     try {
+      const prepared = await prepareImageUpload(character);
       const existing = characters.some(c => c.id === character.id);
-      onCharactersChange(await api<Character[]>(existing ? `/api/admin/characters/${encodeURIComponent(character.id)}` : '/api/admin/characters', existing ? 'PUT' : 'POST', character));
+      onCharactersChange(await api<Character[]>(existing ? `/api/admin/characters/${encodeURIComponent(character.id)}` : '/api/admin/characters', existing ? 'PUT' : 'POST', prepared));
       setMessage(`${character.nameKo}의 기록을 저장했습니다.`); setError('');
     } catch (e) { setError(e instanceof Error ? e.message : '저장하지 못했습니다.'); throw e; }
   };
@@ -76,7 +78,7 @@ export default function AdminPage({ characters, onCharactersChange }: Props) {
   const importLegacy = async () => {
     if (!confirm(`이 브라우저에 남아 있는 ${legacyCount}개의 기록을 서버로 가져올까요? 같은 인물의 서버 기록은 가져온 내용으로 바뀝니다.`)) return;
     setBusy(true); setError('');
-    try { const records = JSON.parse(localStorage.getItem('utopia_hogwarts_characters_v1') || 'null'); onCharactersChange(await api<Character[]>('/api/admin/import', 'POST', records)); setMessage('기존 브라우저 기록을 가져왔습니다.'); setLegacyCount(0); }
+    try { const source = JSON.parse(localStorage.getItem('utopia_hogwarts_characters_v1') || 'null'); if (!Array.isArray(source)) throw new Error('가져올 캐릭터 목록이 올바르지 않습니다.'); const records: Character[] = []; for (const record of source) records.push(await prepareImageUpload(record)); onCharactersChange(await api<Character[]>('/api/admin/import', 'POST', records)); setMessage('기존 브라우저 기록을 가져왔습니다.'); setLegacyCount(0); }
     catch (e) { fail(e); } finally { setBusy(false); }
   };
   const filtered = characters.filter(c => (house === 'all' || house === c.house) && `${c.nameKo} ${c.nameEn}`.toLowerCase().includes(query.toLowerCase()));

@@ -1,3 +1,4 @@
+import { createImageStorage } from './server/image-storage.ts';
 import { storeFromEnvironment } from './server/store-config.ts';
 import tailwindcss from '@tailwindcss/vite';
 import react from '@vitejs/plugin-react';
@@ -8,7 +9,7 @@ import { createApi } from './server/api.ts';
 // 개발·미리보기 서버에 동일한 API 미들웨어를 연결하고 민감 파일의 정적 노출을 차단한다.
 export default defineConfig(({ mode }) => {
   const env = { ...loadEnv(mode, process.cwd(), ''), ...process.env };
-  const api = createApi({ username: env.ADMIN_USERNAME || 'admin', passwordHash: env.ADMIN_PASSWORD_HASH || '', dataDirectory: path.resolve(process.cwd(), env.ARCHIVE_DATA_DIR || 'data'), secureCookie: env.COOKIE_SECURE === 'true', store: storeFromEnvironment(env, path.resolve(process.cwd(), env.ARCHIVE_DATA_DIR || 'data')) });
+  const api = createApi({ username: env.ADMIN_USERNAME || 'admin', passwordHash: env.ADMIN_PASSWORD_HASH || '', dataDirectory: path.resolve(process.cwd(), env.ARCHIVE_DATA_DIR || 'data'), images: env.ARCHIVE_STORAGE !== 'file' && env.SUPABASE_URL && (env.SUPABASE_SECRET_KEY || env.SUPABASE_SERVICE_ROLE_KEY) ? createImageStorage({ url: env.SUPABASE_URL, key: env.SUPABASE_SECRET_KEY || env.SUPABASE_SERVICE_ROLE_KEY! }) : undefined, secureCookie: env.COOKIE_SECURE === 'true', store: storeFromEnvironment(env, path.resolve(process.cwd(), env.ARCHIVE_DATA_DIR || 'data')) });
   return {
     plugins: [react(), tailwindcss(), {
       name: 'archive-api',

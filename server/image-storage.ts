@@ -1,4 +1,4 @@
-import { createHash } from 'node:crypto';
+import { createHash, randomUUID } from 'node:crypto';
 import sharp from 'sharp';
 import type { Character } from '../src/types/character.ts';
 import { MAX_IMAGE_BYTES } from '../src/utils/image-limits.ts';
@@ -92,5 +92,30 @@ export function createImageStorage(options: Options) {
     const imageThumbnail = await upload(`${folder}/thumbnail-v2.webp`, thumbnail, 'image/webp');
     return { ...character, image: imageUrl, imageOriginal, imageThumbnail };
   };
-  return { ensureBucket, prepare };
+  const signUpload = async (id: string) => {
+    if (!/^[a-zA-Z0-9_-]{1,120}$/.test(id)) throw storeError(400, '캐릭터 ID가 올바르지 않습니다.');
+    await ensureBucket();
+    const path = `uploads/${id}/${randomUUID()}/original.png`;
+    const response = await request(`object/upload/sign/${IMAGE_BUCKET}/${path}`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: '{}' });
+    if (!response.ok) fail(response.status);
+    const data = await response.json();
+    if (typeof data.url !== 'string') throw storeError(503, '이미지 업로드 주소를 발급하지 못했습니다.');
+    const signedUrl = `${base}${data.url.replace(/^\//, '')}`;
+    if (!signedUrl.startsWith(`${base}object/upload/sign/${IMAGE_BUCKET}/`)) throw storeError(503, '이미지 업로드 주소를 확인해주세요.');
+    return { signedUrl, path };
+  };
+  const completeUpload = async (id: string, path: string) => {
+    if (!/^[a-zA-Z0-9_-]{1,120}$/.test(id) || !path.startsWith(`uploads/${id}/`) || !/^uploads\/[a-zA-Z0-9_-]+\/[a-f0-9-]{36}\/original\.png$/.test(path)) throw storeError(400, '이미지 업로드 경로가 올바르지 않습니다.');
+    const response = await request(`object/${IMAGE_BUCKET}/${path}`);
+    if (!response.ok) fail(response.status);
+    if (Number(response.headers.get('content-length')) > MAX_IMAGE_BYTES) throw storeError(413, '20MB 이하의 이미지를 선택해주세요.');
+    const buffer = Buffer.from(await response.arrayBuffer());
+    if (buffer.length > MAX_IMAGE_BYTES) throw storeError(413, '20MB 이하의 이미지를 선택해주세요.');
+    const result = await prepare({ id, image: `data:image/png;base64,${buffer.toString('base64')}` } as Character);
+    // This unique staging upload is no longer needed after all permanent images exist.
+    const removed = await request(`object/${IMAGE_BUCKET}`, { method: 'DELETE', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ prefixes: [path] }) });
+    if (!removed.ok) console.warn('Temporary image cleanup deferred');
+    return result;
+  };
+  return { ensureBucket, prepare, signUpload, completeUpload };
 }

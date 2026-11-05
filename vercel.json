@@ -4,6 +4,18 @@
   "buildCommand": "npm run build",
   "outputDirectory": "dist",
   "rewrites": [
-    { "source": "/admin", "destination": "/index.html" }
-  ]
+    {
+      "source": "/api/admin/:path*",
+      "destination": "/api/admin?route=:path*"
+    },
+    {
+      "source": "/admin",
+      "destination": "/index.html"
+    }
+  ],
+  "functions": {
+    "api/admin.ts": {
+      "maxDuration": 60
+    }
+  }
 }

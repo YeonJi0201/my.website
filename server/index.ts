@@ -1,3 +1,4 @@
+import { createImageStorage } from './image-storage.ts';
 import { storeFromEnvironment } from './store-config.ts';
 import express from 'express';
 import path from 'node:path';
@@ -9,7 +10,7 @@ const root = process.cwd();
 const env = { ...loadEnv('production', root, ''), ...process.env };
 const app = express();
 app.disable('x-powered-by');
-app.use(createApi({ username: env.ADMIN_USERNAME || 'admin', passwordHash: env.ADMIN_PASSWORD_HASH || '', dataDirectory: path.resolve(root, env.ARCHIVE_DATA_DIR || 'data'), secureCookie: env.COOKIE_SECURE === 'true', store: storeFromEnvironment(env, path.resolve(root, env.ARCHIVE_DATA_DIR || 'data')) }));
+app.use(createApi({ username: env.ADMIN_USERNAME || 'admin', passwordHash: env.ADMIN_PASSWORD_HASH || '', dataDirectory: path.resolve(root, env.ARCHIVE_DATA_DIR || 'data'), images: env.ARCHIVE_STORAGE !== 'file' && env.SUPABASE_URL && (env.SUPABASE_SECRET_KEY || env.SUPABASE_SERVICE_ROLE_KEY) ? createImageStorage({ url: env.SUPABASE_URL, key: env.SUPABASE_SECRET_KEY || env.SUPABASE_SERVICE_ROLE_KEY! }) : undefined, secureCookie: env.COOKIE_SECURE === 'true', store: storeFromEnvironment(env, path.resolve(root, env.ARCHIVE_DATA_DIR || 'data')) }));
 app.use(express.static(path.join(root, 'dist'), { dotfiles: 'deny' }));
 app.get(/.*/, (_req, res) => { res.sendFile(path.join(root, 'dist/index.html')); });
 app.listen(Number(env.PORT || 3000), () => console.log(`Once Upon a time... http://localhost:${env.PORT || 3000}`));

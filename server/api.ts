@@ -1,3 +1,5 @@
+import { memoryAdminAuth, type AdminAuth } from './admin-auth.ts';
+import type { createImageStorage } from './image-storage.ts';
 import { characterErrors } from '../src/utils/character-validation.ts';
 import express, { type Request, type Response } from 'express';
 import { randomBytes, scryptSync, timingSafeEqual } from 'node:crypto';
@@ -5,7 +7,7 @@ import { createFileStore, type CharacterStore } from './character-store.ts';
 import type { Character } from '../src/types/character.ts';
 
 const asyncRoute = (handler: (req: Request, res: Response) => Promise<void>) => (req: Request, res: Response, next: express.NextFunction) => { Promise.resolve(handler(req, res)).catch(next); };
-type Options = { username: string; passwordHash: string; dataDirectory: string; secureCookie?: boolean; store?: CharacterStore };
+type Options = { username: string; passwordHash: string; dataDirectory: string; secureCookie?: boolean; store?: CharacterStore; auth?: AdminAuth; images?: ReturnType<typeof createImageStorage>; clientAddress?: (req: Request) => string };
 const SESSION_LIFETIME = 8 * 60 * 60 * 1000;
 const COOKIE = 'once_admin_session';
 
@@ -18,15 +20,10 @@ export function createApi(options: Options) {
   // 저장소 경로, 직렬화된 파일 갱신, 메모리 세션과 로그인 시도 제한을 API 인스턴스별로 관리한다.
   const api = express();
   api.disable('x-powered-by');
-  const sessions = new Map<string, number>();
-  const attempts = new Map<string, { count: number; expires: number }>();
+  const auth = options.auth ?? memoryAdminAuth();
   const store = options.store ?? createFileStore(options.dataDirectory);
   const token = (req: Request) => req.headers.cookie?.split(';').map(c => c.trim()).find(c => c.startsWith(`${COOKIE}=`))?.slice(COOKIE.length + 1) || '';
-  const authenticated = (req: Request) => {
-    const key = token(req), expiry = sessions.get(key);
-    if (!expiry || expiry <= Date.now()) { sessions.delete(key); return false; }
-    return true;
-  };
+  const authenticated = (req: Request) => auth.valid(token(req));
   const cookieOptions = (req: Request) => ({ httpOnly: true, sameSite: 'strict' as const, secure: options.secureCookie || req.secure, path: '/api' });
   api.use('/api', (req, res, next) => {
     res.set('Cache-Control', 'no-store');
@@ -41,16 +38,14 @@ export function createApi(options: Options) {
   });
   api.use(express.json({ limit: '45mb' }));
   api.get('/api/characters', (_req, res, next) => { store.list().then(value => res.json(value)).catch(next); });
-  api.get('/api/admin/session', (req, res) => { res.json({ authenticated: authenticated(req) }); });
+  api.get('/api/admin/session', asyncRoute(async (req, res) => { res.json({ authenticated: await authenticated(req) }); }));
   // 관리자 로그인은 원본 비밀번호를 비교하고 제한된 세션 쿠키를 발급한다.
-  api.post('/api/admin/login', (req, res) => {
+  api.post('/api/admin/login', asyncRoute(async (req, res) => {
     if (!options.passwordHash) { res.status(503).json({ error: '관리자 계정이 설정되지 않았습니다. 서버에서 계정을 설정해주세요.' }); return; }
-    const address = req.socket.remoteAddress || 'unknown';
+    const address = options.clientAddress?.(req) || req.socket.remoteAddress || 'unknown';
     const now = Date.now();
-    for (const [key, value] of attempts) if (value.expires < now) attempts.delete(key);
-    const attempt = attempts.get(address) || { count: 0, expires: now + 15 * 60 * 1000 };
-    if (attempt.count >= 5) { res.set('Retry-After', String(Math.ceil((attempt.expires - now) / 1000))); res.status(429).json({ error: '로그인 시도가 많습니다. 잠시 후 다시 시도해주세요.' }); return; }
-    attempt.count++; attempts.set(address, attempt);
+    const attempt = await auth.attempt(address);
+    if (!attempt.allowed) { res.set('Retry-After', String(attempt.retryAfter)); res.status(429).json({ error: '로그인 시도가 많습니다. 15분 후 다시 시도해주세요.' }); return; }
     const { username, password } = req.body || {};
     const [salt, encoded] = options.passwordHash.split(':');
     let matches = false;
@@ -59,22 +54,38 @@ export function createApi(options: Options) {
       matches = timingSafeEqual(actual, Buffer.from(encoded, 'hex'));
     }
     if (!matches || username !== options.username) { res.status(401).json({ error: '아이디 또는 비밀번호를 확인해주세요.' }); return; }
-    attempts.delete(address);
-    for (const [key, expiry] of sessions) if (expiry <= now) sessions.delete(key);
-    sessions.delete(token(req));
+    await auth.reset(address);
+    await auth.revoke(token(req));
     const session = randomBytes(32).toString('hex');
-    sessions.set(session, now + SESSION_LIFETIME);
+    await auth.issue(session, now + SESSION_LIFETIME);
     res.cookie(COOKIE, session, { ...cookieOptions(req), maxAge: SESSION_LIFETIME }).json({ authenticated: true });
-  });
-  api.post('/api/admin/logout', (req, res) => {
-    sessions.delete(token(req));
+  }));
+  api.post('/api/admin/logout', asyncRoute(async (req, res) => {
+    await auth.revoke(token(req));
     res.clearCookie(COOKIE, cookieOptions(req)).json({ authenticated: false });
-  });
+  }));
   // 이후 모든 관리자 경로에서 세션 인증을 강제한다.
   api.use('/api/admin', (req, res, next) => {
-    if (!authenticated(req)) { res.status(401).json({ error: '관리자 로그인이 필요합니다.' }); return; }
-    next();
+    authenticated(req).then(valid => {
+      if (!valid) { res.status(401).json({ error: '관리자 로그인이 필요합니다.' }); return; }
+      next();
+    }).catch(next);
   });
+  api.post('/api/admin/image-upload/sign', asyncRoute(async (req, res) => {
+    if (!options.images) { res.json({ direct: false }); return; }
+    const { id, size, contentType } = req.body || {};
+    if (typeof id !== 'string' || !/^[a-zA-Z0-9_-]{1,120}$/.test(id) || contentType !== 'image/png' || !Number.isInteger(size) || size < 1 || size > 20 * 1024 * 1024) {
+      res.status(400).json({ error: '20MB 이하의 PNG 이미지와 올바른 캐릭터 ID가 필요합니다.' }); return;
+    }
+    res.json({ direct: true, ...await options.images.signUpload(id) });
+  }));
+  api.post('/api/admin/image-upload/complete', asyncRoute(async (req, res) => {
+    if (!options.images) { res.status(503).json({ error: '이미지 저장소가 설정되지 않았습니다.' }); return; }
+    const { id, path } = req.body || {};
+    if (typeof id !== 'string' || typeof path !== 'string') { res.status(400).json({ error: '이미지 업로드 정보가 올바르지 않습니다.' }); return; }
+    const result = await options.images.completeUpload(id, path);
+    res.json({ image: result.image, imageOriginal: result.imageOriginal, imageThumbnail: result.imageThumbnail });
+  }));
   // 인증된 관리자만 캐릭터 등록·수정·삭제와 기존 데이터 병합을 수행한다.
   api.post('/api/admin/characters', asyncRoute(async (req, res) => {
     const errors = characterErrors(req.body);

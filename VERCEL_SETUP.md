@@ -23,10 +23,6 @@ Vercel 프로젝트 → Settings → Environment Variables에서 다음 값을 �
 
 알려주신 미리보기 배포 주소는 외부 요청을 Vercel SSO 로그인으로 이동시키고 있습니다. 공개 방문자에게 공유하려면 Production 주소와 Deployment Protection 설정을 확인하세요. 보호 설정 변경은 이 코드가 수행하지 않습니다.
 
-## 관리자 기능은 별도
+## Vercel 관리자 기능
 
-이번 Vercel 함수는 공개 명부 조회용입니다. 기존 관리자 API는 로컬 `npm run dev` 또는 Node 서버의 `npm start`에서 사용합니다. 동일한 Supabase 프로젝트를 연결하면 로컬 관리자에서 등록한 기록도 Vercel 공개 명부에 표시됩니다.
-
-Vercel에서 관리자까지 운영하려면 추가 전환이 필요합니다. 현재 관리자 세션과 로그인 시도 제한은 서버 메모리에 있고, 이미지는 Base64 요청을 서버에 보내 변환합니다. Vercel Functions의 요청 크기 제한 때문에 기존 20MB 업로드를 그대로 옮길 수 없습니다. 서버리스 관리자 운영에는 영구 세션·로그인 제한 저장과 서명된 Storage 직접 업로드가 필요합니다. 대안은 기존 Express 서버를 Node 호스팅에서 운영하고 Vercel과 같은 출처로 연결하는 것입니다.
-
-현재 로컬·Node 운영 방식과 Vercel 공개 조회를 구분해서 사용하세요. `/admin` 화면 경로가 열리는 것과 관리자 API가 배포된 것은 별개입니다.
+관리자 로그인·캐릭터 CRUD·20MB PNG 직접 업로드를 추가했습니다. 최초 인증 SQL과 관리자 환경 변수가 필요합니다. [VERCEL_ADMIN.md](./VERCEL_ADMIN.md)에 따라 설정하세요. 이전의 로컬/Node 관리자 화면도 계속 사용할 수 있습니다.
