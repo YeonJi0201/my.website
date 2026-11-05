@@ -19,7 +19,13 @@ export function CharacterPortrait({ character, className = '', variant = 'profil
   const [size, setSize] = useState({ width: 400, height: 500 });
   const [natural, setNatural] = useState({ width: 0, height: 0 });
   const [face, setFace] = useState<FaceBox | null>(null);
-  useEffect(() => { setNatural({ width: 0, height: 0 }); }, [source]);
+  useEffect(() => {
+    // A cached image may finish loading before effects run, including on mobile.
+    const image = picture.current;
+    setNatural(image?.complete && image.naturalWidth
+      ? { width: image.naturalWidth, height: image.naturalHeight }
+      : { width: 0, height: 0 });
+  }, [source]);
   useEffect(() => {
     if (!viewport.current) return;
     const observer = new ResizeObserver(([entry]) => setSize({ width: entry.contentRect.width, height: entry.contentRect.height }));

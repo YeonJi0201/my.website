@@ -393,8 +393,8 @@ body:has(.roster) .smoke-veil { opacity: .3; }
 .roster-count { margin: 34px 0 20px; font: 400 14px/1 var(--font-garamond); color: #847e72; }
 .roster-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 48px 28px; margin: 0; padding: 0; list-style: none; }
 .roster-entry { display: flex; flex-direction: column; width: 100%; padding: 0; text-align: left; color: inherit; cursor: pointer; }
-.roster-portrait { position: relative; display: block; aspect-ratio: 4 / 5; overflow: hidden; background: #0d0e10; border-top: 2px solid rgba(var(--house-rgb), .95); }
-.roster-portrait .character-portrait { height: 100%; }
+.roster-portrait { position: relative; display: block; width: 100%; min-width: 0; flex: 0 0 auto; aspect-ratio: 4 / 5; overflow: hidden; background: #0d0e10; border-top: 2px solid rgba(var(--house-rgb), .95); }
+.roster-portrait .character-portrait { position: absolute; inset: 0; width: 100%; height: 100%; }
 .roster-entry .character-portrait img { filter: saturate(.85) brightness(.9); transition: filter .45s ease; }
 .roster-entry:hover .character-portrait img,
 .roster-entry:focus-visible .character-portrait img { filter: saturate(1) brightness(1.04); }
@@ -504,7 +504,7 @@ body:has(.roster) .smoke-veil { opacity: .3; }
   .roster-heading p { font-size: 13px; }
   .roster-houses { gap: 2px 20px; }
   .roster-finders { width: 100%; gap: 18px; }
-  .roster-search { width: auto; flex: 1; }
+  .roster-search { width: auto; min-width: 0; flex: 1; }
   .roster-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 34px 16px; }
   .roster-name { font-size: 17px; }
   .roster-name-en { font-size: 14px; }
