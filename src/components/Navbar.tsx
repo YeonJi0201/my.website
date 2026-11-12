@@ -4,6 +4,7 @@ import type { NavigationTarget } from '../types/navigation';
 import { sound } from '../utils/audio';
 import crest from '../assets/images/crest-emblem.webp';
 import { HeaderMark, Sparkle } from './HeroOrnaments';
+import { crestTrace } from './crestTrace';
 
 interface NavbarProps {
   currentTab: NavigationTarget | 'profile';
@@ -91,8 +92,15 @@ export function Navbar({ currentTab, onNavigate, soundEnabled, onToggleSound, ov
   return <header ref={header} className={`site-header${overlay ? ' is-overlay' : ''}${overlay && overHero ? ' is-over-hero' : ''}${scrolling ? '' : ' is-idle'}`}>
     <div className="site-header-inner">
       <a className="site-wordmark" href="#home" aria-label="Once Upon a time... 메인으로" onClick={event => navigate(event, 'home')}>
-        <img className="brand-crest" src={crest} alt="" width={125} height={79} decoding="async" />
-        <span lang="en">Once Upon a time...</span>
+        {/* 첫 로딩 연출: 금빛 윤곽선이 그려진 뒤 문장이 채워지고 빛이 한 번 스친다(moonlit.css의 site-intro). */}
+        <span className="brand-crest" aria-hidden="true">
+          <img className="brand-crest-fill" src={crest} alt="" width={125} height={79} decoding="async" />
+          <span className="brand-crest-glint" style={{ WebkitMaskImage: `url(${crest})`, maskImage: `url(${crest})` }} />
+          <svg className="brand-crest-trace" viewBox={`0 0 ${crestTrace.w} ${crestTrace.h}`} preserveAspectRatio="none" focusable="false">
+            {crestTrace.paths.map((d, i) => <path key={i} d={d} pathLength={1} style={{ '--i': i } as React.CSSProperties} />)}
+          </svg>
+        </span>
+        <span className="brand-name" lang="en">Once Upon a time...</span>
       </a>
       <nav aria-label="주 메뉴"><ul>{links.map((link, index) => {
         const active = currentTab === link.id || (link.id === 'directory' && currentTab === 'profile');

@@ -147,3 +147,20 @@
 - 동작 로직은 바꾸지 않았다. 기존 스크롤 헤더와 합성 효과음 동작은 그대로 유지한다.
 - JSON은 표준 문법상 주석을 지원하지 않아 `package.json`, 설정 JSON 및 `data/characters.json`은 수정하지 않았다. 이미지·생성 파일도 대상에서 제외했다. 관리자 계정 자격 증명과 캐릭터 기록 내용을 주석·기록에 복사하지 않았다.
 - 주석은 해당 코드 파일을 바로 열어 주요 함수와 JSX/CSS 구역 앞에서 확인한다. 자동 생성된 Vite 선언 파일은 기존 타입 참조 주석만 유지한다.
+
+## 첫 로딩 로고 연출 — 2026-11-12
+
+- 사용자 요청: https://utopiapoint.vercel.app/ (같은 "Once Upon a time..." 워드마크를 쓰는 사용자의 기숙사 점수 보드)를 참고해 첫 로딩 때 로고가 움직이게. 참고 사이트의 번들을 직접 내려받아 방식을 확인하고 같은 구조로 옮겼다.
+- 동작: `main.tsx`가 `<html data-site-intro="on">`을 켜고, 이름이 `intro-`로 시작하는 CSS 애니메이션이 모두 끝나면(최대 15초) 지운다. 히어로 `HeroScene`의 기존 `data-intro`와는 이름을 분리했다.
+- 순서(약 3.8초): 헤더 가로선이 가운데에서 양쪽으로 열림(0.2s) → 헤더 문장의 금빛 윤곽선 9개가 차례로 그려짐(0.3s~) → 문장 이미지가 왼쪽부터 채워짐(1.3s) → 워드마크가 흐림에서 또렷해짐(1.5s) → 메뉴·효과음 버튼이 차례로 떠오름(1.7–2.1s) → 윤곽선이 사라지며 문장에 빛이 한 번 스침(2.3–3.8s). 페이지를 새로 열 때마다 재생하며, `prefers-reduced-motion`에서는 재생하지 않는다.
+- 윤곽선 데이터는 `src/components/crestTrace.ts`(crest-emblem.webp 알파 윤곽을 마칭 스퀘어로 추출, 250×158 좌표). **문장 이미지를 바꾸면 윤곽도 다시 추출해야 한다.** 추출 스크립트는 세션 임시 폴더에만 두었다.
+- 마크업: `Navbar`의 `.brand-crest`가 이제 `span`(채움 이미지 `.brand-crest-fill` + 빛 `.brand-crest-glint` + SVG `.brand-crest-trace`)이고 워드마크 글자는 `.brand-name`. 스타일은 `moonlit.css`의 "첫 로딩 로고 연출" 구역.
+- 확인: `npm run lint`, `npm run build` 통과. 헤드리스 Edge 1440×900·390×844에서 0.5/1.1/1.8/2.6/3.6초 프레임으로 윤곽선→채움→메뉴 등장 순서, 종료 후 플래그 해제와 평소 헤더와 같은 최종 화면, 실행 오류 없음을 확인했다.
+
+## 메인 제목 등장 연출 — 2026-11-12
+
+- 사용자 요청: utopiapoint의 "House Status" 제목처럼 메인 제목 "Once Upon a time."이 나타나게. 참고 사이트는 제목 이미지 위에 글자 윤곽선을 그린 뒤 채우고 빛을 스치게 한다.
+- 우리 제목은 HTML 텍스트(금박 그라데이션)를 그대로 두고, 위에 같은 크기의 SVG 두 장(`TitleTrace`, `HeroOrnaments.tsx`)을 겹친다: 금빛 윤곽선 `.moonlit-title-trace`, 글자 모양 빛 `.moonlit-title-glint`.
+- 윤곽 데이터 `src/components/titleTrace.ts`: 헤드리스 Edge에서 글자별 위치·기준선을 측정하고, Gilda Display / Cormorant Garamond Italic 500 TTF에서 opentype.js로 글리프를 뽑았다(1em=100, 4.88em×1.918em). **제목 글꼴·자간·줄 배치(`.moonlit-title*`)를 바꾸면 다시 추출해야 한다.** 측정·추출 스크립트는 세션 임시 폴더에만 두었다.
+- 순서(히어로 `data-ready="true"` 기준): 0.9s부터 글자마다 윤곽선이 80ms 간격으로 그려짐 → 1.9s 제목이 왼쪽부터 채워짐(`moonlitTitleFill`, 마스크는 연출 중에만) → 3.1s 윤곽선 사라짐 → 3.3s 빛이 한 번 스침. 이에 맞춰 장식 곡선 1.9s, 부제 2.6s, 구분선 2.8s, 버튼 3.0s, 인용문 3.1s, 스크롤 안내 3.5s로 늦췄다. 쓰지 않게 된 `moonlitTitle` 키프레임은 지웠다. 동작 줄이기에서는 재생하지 않는다.
+- 확인: `npm run lint`, `npm run build` 통과. 1440×900·390×844에서 윤곽선과 실제 글자가 겹쳐 맞고, 최종 화면이 이전과 같으며 실행 오류가 없음을 캡처로 확인했다.

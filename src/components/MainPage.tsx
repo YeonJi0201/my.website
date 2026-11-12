@@ -7,7 +7,7 @@ import type { HouseType } from '../types/character';
 import type { HomeSection, ScrollRequest } from '../types/navigation';
 import { HouseEmblem } from './HouseEmblem';
 import { HeroScene } from './HeroScene';
-import { HeroFlourish, ScrollCue, Sparkle, StarRule, TaglineDivider } from './HeroOrnaments';
+import { HeroFlourish, ScrollCue, Sparkle, StarRule, TaglineDivider, TitleTrace } from './HeroOrnaments';
 import castle from '../assets/images/world-castle.webp';
 import enterFrame from '../assets/images/enter-frame.webp';
 
@@ -120,6 +120,8 @@ export function MainPage({ onNavigateToDirectory, scrollRequest, onSectionChange
         <div className="moonlit-title-wrap">
           <HeroFlourish />
           <h1 id="hero-title" className="moonlit-title"><span className="moonlit-title-line">Once Upon</span> <span className="moonlit-title-line moonlit-title-tail"><em>a</em> time.</span></h1>
+          <TitleTrace />
+
         </div>
         <p className="moonlit-tagline"><span className="moonlit-tagline-first">A new story begins</span> <span>in Hogwarts</span></p>
         <TaglineDivider className="moonlit-divider" />

@@ -1,4 +1,5 @@
 // Hand-set linework for the home hero and header. Coordinates follow the approved comp (1672 × 941).
+import { titleTrace } from './titleTrace';
 
 // 반복해서 쓰는 SVG 반짝임 도형과 장식 요소를 아래 그림 구성에서 공유한다.
 const SPARK = 'M0-7C.55-1.05 1.05-.55 7 0 1.05.55.55 1.05 0 7-.55 1.05-1.05.55-7 0-1.05-.55-.55-1.05 0-7Z';
@@ -113,4 +114,18 @@ export function HeaderMark() {
     <path transform="translate(35 10) scale(1.3)" d={SPARK} fill="currentColor" />
     <path d="M35 8.4 36.2 10 35 11.6 33.8 10Z" fill="#141518" />
   </svg>;
+}
+
+// 메인 제목 위에 겹치는 첫 로딩 연출용 레이어: 금빛 글자 윤곽선(그려짐)과 글자 모양의 빛(한 번 스침).
+// 참고: utopiapoint 점수 보드의 "House Status" 제목 연출. 스타일은 moonlit.css의 "제목 등장 연출".
+export function TitleTrace() {
+  const viewBox = `0 0 ${titleTrace.w} ${titleTrace.h}`;
+  return <>
+    <svg className="moonlit-title-glint" viewBox={viewBox} aria-hidden="true" focusable="false">
+      {titleTrace.paths.map((d, i) => <path key={i} d={d} />)}
+    </svg>
+    <svg className="moonlit-title-trace" viewBox={viewBox} aria-hidden="true" focusable="false">
+      {titleTrace.paths.map((d, i) => <path key={i} d={d} pathLength={1} style={{ '--i': i } as React.CSSProperties} />)}
+    </svg>
+  </>;
 }
