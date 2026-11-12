@@ -13,6 +13,14 @@
       "destination": "/index.html"
     }
   ],
+  "headers": [
+    {
+      "source": "/api/characters",
+      "headers": [
+        { "key": "Access-Control-Allow-Origin", "value": "*" }
+      ]
+    }
+  ],
   "functions": {
     "api/admin.ts": {
       "maxDuration": 60
