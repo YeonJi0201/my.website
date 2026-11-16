@@ -18,7 +18,8 @@ export async function api<T>(url: string, method = 'GET', body?: unknown): Promi
   const contentType = response.headers.get('content-type') || '';
   if (!contentType.includes('application/json')) throw new ApiError('서버가 API 대신 HTML 화면을 반환했습니다. Vercel API 배포·라우팅·로그인 보호 설정을 확인해주세요.', response.status);
   const result = await response.json();
-  if (!response.ok) throw new ApiError(response.status === 401 ? '관리자 로그인이 만료되었거나 로그인되지 않았습니다. 다시 로그인한 뒤 저장해주세요.' : result.error || `요청을 완료하지 못했습니다. (HTTP ${response.status})`, response.status);
+  // 로그인 요청 자체의 401(이메일·비밀번호 불일치)은 서버 문구를 그대로 보여준다.
+  if (!response.ok) throw new ApiError(response.status === 401 && url !== '/api/admin/login' ? '관리자 로그인이 만료되었거나 로그인되지 않았습니다. 다시 로그인한 뒤 저장해주세요.' : result.error || `요청을 완료하지 못했습니다. (HTTP ${response.status})`, response.status);
   return result;
 }
 export const getCharacters = () => api<Character[]>('/api/characters');
