@@ -11,6 +11,8 @@ import { WAND_WOODS, WAND_CORES, WAND_LENGTHS, WAND_FLEXIBILITIES } from '../dat
 import { sound } from '../utils/audio';
 import { birthdayDays, parseBirthday, WEEKDAYS } from '../utils/registration-fields';
 
+const AGE_PRESETS = [11, 14, 17];
+
 interface CharacterModalProps {
   isOpen: boolean;
   onClose: () => void;
@@ -35,7 +37,9 @@ export const CharacterModal: React.FC<CharacterModalProps> = ({
   const [nameEn, setNameEn] = useState('');
   const [house, setHouse] = useState<HouseType>(defaultHouse);
   const [gender, setGender] = useState('여성');
-  const [age, setAge] = useState(16);
+  const [age, setAge] = useState(11);
+  // 만 11·14·17세는 고정 선택지, 그 외 나이는 사용자 지정 입력으로 받는다.
+  const [customAge, setCustomAge] = useState(false);
   const [height, setHeight] = useState('');
   const [weight, setWeight] = useState('');
   const [year, setYear] = useState(1);
@@ -75,6 +79,7 @@ export const CharacterModal: React.FC<CharacterModalProps> = ({
       setHouse(initialCharacter.house);
       setGender(initialCharacter.gender);
       setAge(initialCharacter.age);
+      setCustomAge(!AGE_PRESETS.includes(initialCharacter.age));
       setHeight(initialCharacter.height?.toString() || '');
       setWeight(initialCharacter.weight?.toString() || '');
       setYear(initialCharacter.year);
@@ -103,7 +108,8 @@ export const CharacterModal: React.FC<CharacterModalProps> = ({
       setNameEn('');
       setHouse(defaultHouse);
       setGender('여성');
-      setAge(16);
+      setAge(11);
+      setCustomAge(false);
       setHeight('');
       setWeight('');
       setYear(1);
@@ -177,7 +183,7 @@ export const CharacterModal: React.FC<CharacterModalProps> = ({
       nameEn: nameEn.trim() || nameKo.trim(),
       house,
       gender,
-      age: Number(age) || 16,
+      age: Number(age) || 11,
       height: Number(height) > 0 ? Number(height) : undefined,
       weight: Number(weight) > 0 ? Number(weight) : undefined,
       year,
@@ -365,12 +371,32 @@ export const CharacterModal: React.FC<CharacterModalProps> = ({
                   </div>
                   <div>
                     <label className="block text-xs text-[#a19d94] mb-1">나이</label>
-                    <input
-                      type="number"
-                      value={age}
-                      onChange={(e) => setAge(Number(e.target.value))}
+                    <select
+                      aria-label="나이 선택"
+                      value={customAge ? 'custom' : age}
+                      onChange={(e) => {
+                        if (e.target.value === 'custom') { setCustomAge(true); return; }
+                        setCustomAge(false); setAge(Number(e.target.value));
+                      }}
                       className="w-full px-2.5 py-1.5 bg-[#0c121e] border border-[#d4a33e]/25 rounded-lg text-xs text-[#e8e4dc] focus:outline-none focus:border-[#d4a33e]"
-                    />
+                    >
+                      {AGE_PRESETS.map((value) => <option key={value} value={value}>만 {value}세</option>)}
+                      <option value="custom">사용자 지정</option>
+                    </select>
+                    {customAge && (
+                      <input
+                        type="number"
+                        aria-label="사용자 지정 나이"
+                        min={1}
+                        max={200}
+                        step={1}
+                        required
+                        value={age || ''}
+                        onChange={(e) => setAge(Number(e.target.value))}
+                        placeholder="나이 입력"
+                        className="mt-1.5 w-full px-2.5 py-1.5 bg-[#0c121e] border border-[#d4a33e]/25 rounded-lg text-xs text-[#e8e4dc] focus:outline-none focus:border-[#d4a33e]"
+                      />
+                    )}
                   </div>
                   <div>
                     <label className="block text-xs text-[#a19d94] mb-1">학년</label>
