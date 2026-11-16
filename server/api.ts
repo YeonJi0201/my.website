@@ -1,5 +1,6 @@
 import { memoryAdminAuth, type AdminAuth } from './admin-auth.ts';
 import type { createImageStorage } from './image-storage.ts';
+import type { VerifyAdmin } from './supabase-admin-login.ts';
 import { characterErrors } from '../src/utils/character-validation.ts';
 import express, { type Request, type Response } from 'express';
 import { randomBytes, scryptSync, timingSafeEqual } from 'node:crypto';
@@ -7,7 +8,7 @@ import { createFileStore, type CharacterStore } from './character-store.ts';
 import type { Character } from '../src/types/character.ts';
 
 const asyncRoute = (handler: (req: Request, res: Response) => Promise<void>) => (req: Request, res: Response, next: express.NextFunction) => { Promise.resolve(handler(req, res)).catch(next); };
-type Options = { username: string; passwordHash: string; dataDirectory: string; secureCookie?: boolean; store?: CharacterStore; auth?: AdminAuth; images?: ReturnType<typeof createImageStorage>; clientAddress?: (req: Request) => string };
+type Options = { username: string; passwordHash: string; dataDirectory: string; secureCookie?: boolean; store?: CharacterStore; auth?: AdminAuth; images?: ReturnType<typeof createImageStorage>; clientAddress?: (req: Request) => string; verifyAdmin?: VerifyAdmin };
 const SESSION_LIFETIME = 8 * 60 * 60 * 1000;
 const COOKIE = 'once_admin_session';
 
@@ -41,19 +42,24 @@ export function createApi(options: Options) {
   api.get('/api/admin/session', asyncRoute(async (req, res) => { res.json({ authenticated: await authenticated(req) }); }));
   // 관리자 로그인은 원본 비밀번호를 비교하고 제한된 세션 쿠키를 발급한다.
   api.post('/api/admin/login', asyncRoute(async (req, res) => {
-    if (!options.passwordHash) { res.status(503).json({ error: '관리자 계정이 설정되지 않았습니다. 서버에서 계정을 설정해주세요.' }); return; }
+    if (!options.verifyAdmin && !options.passwordHash) { res.status(503).json({ error: '관리자 계정이 설정되지 않았습니다. 서버에서 계정을 설정해주세요.' }); return; }
     const address = options.clientAddress?.(req) || req.socket.remoteAddress || 'unknown';
     const now = Date.now();
     const attempt = await auth.attempt(address);
     if (!attempt.allowed) { res.set('Retry-After', String(attempt.retryAfter)); res.status(429).json({ error: '로그인 시도가 많습니다. 15분 후 다시 시도해주세요.' }); return; }
-    const { username, password } = req.body || {};
-    const [salt, encoded] = options.passwordHash.split(':');
+    const { username, email, password } = req.body || {};
     let matches = false;
-    if (typeof password === 'string' && password.length <= 512 && salt && /^[a-f0-9]{128}$/.test(encoded || '')) {
-      const actual = scryptSync(password, salt, 64);
-      matches = timingSafeEqual(actual, Buffer.from(encoded, 'hex'));
+    if (options.verifyAdmin) {
+      // Supabase Auth 이메일·비밀번호 + public.archive_admins 등록 여부를 함께 확인한다.
+      matches = await options.verifyAdmin(email ?? username, password);
+    } else {
+      const [salt, encoded] = options.passwordHash.split(':');
+      if (typeof password === 'string' && password.length <= 512 && salt && /^[a-f0-9]{128}$/.test(encoded || '')) {
+        const actual = scryptSync(password, salt, 64);
+        matches = timingSafeEqual(actual, Buffer.from(encoded, 'hex')) && (email ?? username) === options.username;
+      }
     }
-    if (!matches || username !== options.username) { res.status(401).json({ error: '아이디 또는 비밀번호를 확인해주세요.' }); return; }
+    if (!matches) { res.status(401).json({ error: '이메일 또는 비밀번호를 확인해주세요. 관리자 권한이 없는 계정은 들어올 수 없습니다.' }); return; }
     await auth.reset(address);
     await auth.revoke(token(req));
     const session = randomBytes(32).toString('hex');

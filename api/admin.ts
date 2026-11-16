@@ -3,19 +3,19 @@ import { createApi } from '../server/api.ts';
 import { createSupabaseStore } from '../server/supabase-store.ts';
 import { supabaseAdminAuth } from '../server/admin-auth.ts';
 import { createImageStorage } from '../server/image-storage.ts';
+import { supabaseAdminLogin } from '../server/supabase-admin-login.ts';
 
 let app: ReturnType<typeof createApi> | undefined;
 export default function handler(req: Request, res: Response) {
   try {
     const url = process.env.SUPABASE_URL?.trim();
     const key = (process.env.SUPABASE_SECRET_KEY || process.env.SUPABASE_SERVICE_ROLE_KEY)?.trim();
-    const username = process.env.ADMIN_USERNAME?.trim();
-    const passwordHash = process.env.ADMIN_PASSWORD_HASH;
-    if (!url || !key || !username || !passwordHash || !/^[^:\r\n]{1,256}:[a-f0-9]{128}$/.test(passwordHash)) {
-      res.status(503).json({ error: 'Vercel 관리자 환경 변수가 필요합니다. SUPABASE_URL·SUPABASE_SECRET_KEY·ADMIN_USERNAME·ADMIN_PASSWORD_HASH를 설정한 뒤 재배포해주세요.' });
+    if (!url || !key) {
+      res.status(503).json({ error: 'Vercel 관리자 환경 변수가 필요합니다. SUPABASE_URL·SUPABASE_SECRET_KEY를 설정한 뒤 재배포해주세요.' });
       return;
     }
-    if (!app) app = createApi({ username, passwordHash, dataDirectory: '/tmp/unused', secureCookie: true,
+    // 관리자 로그인은 Supabase Auth 이메일·비밀번호와 public.archive_admins 등록 여부로 판단한다.
+    if (!app) app = createApi({ username: '', passwordHash: '', verifyAdmin: supabaseAdminLogin({ url, key }), dataDirectory: '/tmp/unused', secureCookie: true,
       store: createSupabaseStore({ url, key }), auth: supabaseAdminAuth({ url, key }), images: createImageStorage({ url, key }),
       clientAddress: request => String(request.headers['x-vercel-forwarded-for'] || request.socket.remoteAddress || 'unknown').split(',')[0].trim(),
     });

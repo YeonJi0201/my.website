@@ -40,7 +40,7 @@ export default function AdminPage({ characters, onCharactersChange }: Props) {
   const login = async (event: React.FormEvent) => {
     event.preventDefault(); setBusy(true); setError('');
     try {
-      await api('/api/admin/login', 'POST', { username, password });
+      await api('/api/admin/login', 'POST', { email: username.trim(), password });
       setPassword(''); setStatus('admin');
       onCharactersChange(await getCharacters());
     } catch (e) { fail(e); } finally { setBusy(false); }
@@ -88,7 +88,7 @@ export default function AdminPage({ characters, onCharactersChange }: Props) {
     <div className="admin-topbar"><a href="/"><ArrowLeft size={15} /> 커뮤니티로 돌아가기</a><span>Once Upon a time...</span>{status === 'admin' && <button onClick={() => void logout()} disabled={busy}><LogOut size={15} /> 로그아웃</button>}</div>
     {status === 'checking' ? <p className="archive-loading" role="status">출입 권한을 확인하는 중입니다…</p> : status === 'guest' ? <section className="admin-login">
       <ShieldCheck size={36} strokeWidth={1} /><span className="small-caps">THE KEEPER'S ARCHIVE</span><h1>기록 관리자의 서고</h1><p>허가된 관리자만 이 서고의 기록을 바꿀 수 있습니다.</p>
-      <form onSubmit={login}><label>관리자 아이디<input autoComplete="username" required value={username} onChange={e => setUsername(e.target.value)} /></label><label>비밀번호<input type="password" autoComplete="current-password" required maxLength={512} value={password} onChange={e => setPassword(e.target.value)} /></label>{error && <p className="admin-error" role="alert">{error}</p>}<button type="submit" disabled={busy}>{busy ? '권한 확인 중…' : '서고에 들어가기'}</button></form>
+      <form onSubmit={login}><label>관리자 이메일<input type="text" inputMode="email" autoComplete="username" placeholder="admin@example.com" required maxLength={384} value={username} onChange={e => setUsername(e.target.value)} /></label><label>비밀번호<input type="password" autoComplete="current-password" required maxLength={512} value={password} onChange={e => setPassword(e.target.value)} /></label>{error && <p className="admin-error" role="alert">{error}</p>}<button type="submit" disabled={busy}>{busy ? '권한 확인 중…' : '서고에 들어가기'}</button></form>
     </section> : <>
       <div className="admin-heading"><div><span className="small-caps">ADMINISTRATION · 관리자 전용</span><h1>인물 기록 관리</h1><p>캐릭터의 등록, 이미지와 프로필 수정, 기록 삭제를 관리합니다.</p></div><button className="admin-primary" onClick={() => setEditor('new')} disabled={busy}><Plus size={16} /> 캐릭터 등록</button></div>
       {error && <p className="admin-error" role="alert">{error}</p>}<p className="admin-message" role="status">{message}</p>
