@@ -48,3 +48,14 @@ test('login fails closed while public sign-up is enabled', async () => {
   const verify = supabaseAdminLogin({ url: 'https://test.supabase.co', key: 'sb_secret_test', fetch: supabase(false) });
   await assert.rejects(verify('keeper@example.com', 'test-only-admin-password'), { status: 503 });
 });
+
+test('five attempts are allowed, then login is locked for five minutes', async () => {
+  const { memoryAdminAuth } = await import('./admin-auth.ts');
+  const auth = memoryAdminAuth();
+  for (let i = 0; i < 5; i++) assert.equal((await auth.attempt('client')).allowed, true);
+  const blocked = await auth.attempt('client');
+  assert.equal(blocked.allowed, false);
+  assert.ok(blocked.retryAfter > 290 && blocked.retryAfter <= 300);
+  await auth.reset('client');
+  assert.equal((await auth.attempt('client')).allowed, true);
+});

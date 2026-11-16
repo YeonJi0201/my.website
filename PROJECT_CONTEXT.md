@@ -174,3 +174,4 @@
 - 로그인 폼 라벨은 "관리자 이메일", 요청 본문은 `{ email, password }`(서버는 `username`도 호환). `server/supabase-admin-login.test.ts` 포함 `npm run test:api` 19개 통과.
 - 2026-11-16 점검 시 Users 4명 모두 이메일 확인 완료, 공개 가입은 켜져 있었다(사용자가 꺼야 로그인 가능).
 - `scripts/check-vercel-production.ts`는 아직 `.admin-access.local.txt`의 아이디 방식이라 운영 점검 시 갱신이 필요하다.
+- 로그인 제한(2026-11-16 사용자 요청): **5회까지 시도, 5번째 시도 후 5분 잠금**. 운영은 `supabase/migrations/202611160002_admin_login_lockout.sql`(SQL Editor에서 실행 필요), 로컬 메모리 인증은 `server/admin-auth.ts`. 429 문구는 남은 분을 표시한다. 로그인 성공 시 시도 기록 초기화.

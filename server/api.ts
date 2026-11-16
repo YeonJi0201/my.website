@@ -46,7 +46,7 @@ export function createApi(options: Options) {
     const address = options.clientAddress?.(req) || req.socket.remoteAddress || 'unknown';
     const now = Date.now();
     const attempt = await auth.attempt(address);
-    if (!attempt.allowed) { res.set('Retry-After', String(attempt.retryAfter)); res.status(429).json({ error: '로그인 시도가 많습니다. 15분 후 다시 시도해주세요.' }); return; }
+    if (!attempt.allowed) { res.set('Retry-After', String(attempt.retryAfter)); res.status(429).json({ error: `로그인을 5회 틀려 잠시 잠겼습니다. ${Math.max(1, Math.ceil(attempt.retryAfter / 60))}분 후 다시 시도해주세요.` }); return; }
     const { username, email, password } = req.body || {};
     let matches = false;
     if (options.verifyAdmin) {

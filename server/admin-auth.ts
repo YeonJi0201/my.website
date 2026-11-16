@@ -7,7 +7,8 @@ export interface AdminAuth {
   attempt(address: string): Promise<{ allowed: boolean; retryAfter: number }>;
   reset(address: string): Promise<void>;
 }
-const digest = (value: string) => createHash('sha256').update(value).digest('hex');
+const LOCKOUT_MS = 5 * 60 * 1000;
+const digest =(value: string) => createHash('sha256').update(value).digest('hex');
 export function memoryAdminAuth(): AdminAuth {
   const sessions = new Map<string, number>();
   const attempts = new Map<string, { count: number; expires: number }>();
@@ -18,8 +19,11 @@ export function memoryAdminAuth(): AdminAuth {
     async attempt(address) {
       const now = Date.now();
       for (const [key, value] of attempts) if (value.expires <= now) attempts.delete(key);
-      const record = attempts.get(address) ?? { count: 0, expires: now + 15 * 60 * 1000 };
-      const allowed = record.count < 5; record.count++; attempts.set(address, record);
+      // 5회까지 허용하고, 5번째 시도 시점부터 5분 동안 잠근다(잠긴 동안의 시도는 시간을 늘리지 않음).
+      const record = attempts.get(address) ?? { count: 0, expires: now };
+      const allowed = record.count < 5; record.count++;
+      if (allowed) record.expires = now + LOCKOUT_MS;
+      attempts.set(address, record);
       return { allowed, retryAfter: Math.max(1, Math.ceil((record.expires - now) / 1000)) };
     },
     async reset(address) { attempts.delete(address); },
