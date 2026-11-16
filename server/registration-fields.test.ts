@@ -25,3 +25,10 @@ test('other school year is valid for new records, with existing years preserved'
   assert.equal(formatSchoolYear(4), '4학년');
   assert.equal(formatSchoolYear(7), '7학년');
 });
+
+test('birthday display hides any stored weekday', async () => {
+  const { formatBirthday } = await import('../src/utils/registration-fields.ts');
+  assert.equal(formatBirthday('2월 29일 (월요일)'), '2월 29일');
+  assert.equal(formatBirthday('10월 24일 일요일'), '10월 24일');
+  assert.equal(formatBirthday('10월 24일'), '10월 24일');
+});

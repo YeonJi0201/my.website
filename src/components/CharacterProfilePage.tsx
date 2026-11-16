@@ -1,4 +1,4 @@
-import { formatSchoolYear } from '../utils/registration-fields';
+import { formatBirthday, formatSchoolYear } from '../utils/registration-fields';
 import { HouseEmblem } from './HouseEmblem';
 import { CharacterPortrait } from './CharacterPortrait';
 import React, { useEffect, useRef, useState } from 'react';
@@ -43,7 +43,7 @@ export const CharacterProfilePage: React.FC<CharacterProfilePageProps> = ({ char
             <div><dt>Weight</dt><dd>{character.weight ? `${character.weight} kg` : '?'}</dd></div>
             <div><dt>Blood</dt><dd>{character.bloodStatus}</dd></div>
           </dl>
-          <p className="identity-addendum">{character.gender} · {character.birthday}<br />{character.positionOrClub}</p>
+          <p className="identity-addendum">{character.gender} · {formatBirthday(character.birthday)}<br />{character.positionOrClub}</p>
         </motion.aside>
         <motion.div key={`portrait-${character.id}`} className="center-portrait profile-center" initial={{ opacity: 0, x: reducedMotion ? 0 : 35 }} animate={{ opacity: 1, x: 0 }} transition={{ duration: reducedMotion ? 0 : .8, ease: [0.16, 1, 0.3, 1] }}>
           <button ref={zoomTrigger} className="enchanted-frame" onClick={() => setZoom(true)} aria-label={`${character.nameKo} 이미지 확대`}>

@@ -10,3 +10,6 @@ export function parseBirthday(value: string) {
   const day = match ? Math.max(1, Math.min(birthdayDays(month), Number(match[2]))) : 1;
   return { month, day, weekday: WEEKDAYS.find(day => value.includes(day)) ?? '' };
 }
+
+// 생일 표시는 월·일만 사용한다. 예전 기록에 남은 "(월요일)" 같은 요일 표기는 숨긴다.
+export const formatBirthday = (value: string) => value.replace(/\s*\(?[월화수목금토일]요일\)?/g, '').trim();

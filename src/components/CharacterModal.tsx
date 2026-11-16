@@ -9,7 +9,7 @@ import { Character, HouseType } from '../types/character';
 import { HOUSES } from '../data/houseData';
 import { WAND_WOODS, WAND_CORES, WAND_LENGTHS, WAND_FLEXIBILITIES } from '../data/wand-options';
 import { sound } from '../utils/audio';
-import { birthdayDays, parseBirthday, WEEKDAYS } from '../utils/registration-fields';
+import { birthdayDays, parseBirthday } from '../utils/registration-fields';
 
 const AGE_PRESETS = [11, 14, 17];
 
@@ -45,7 +45,6 @@ export const CharacterModal: React.FC<CharacterModalProps> = ({
   const [year, setYear] = useState(1);
   const [birthdayMonth, setBirthdayMonth] = useState(1);
   const [birthdayDay, setBirthdayDay] = useState(1);
-  const [birthdayWeekday, setBirthdayWeekday] = useState('');
   const [bloodStatus, setBloodStatus] = useState<'순수혈통' | '혼혈' | '머글태생'>('혼혈');
 
   // 지팡이와 마법 설정 입력값
@@ -86,7 +85,6 @@ export const CharacterModal: React.FC<CharacterModalProps> = ({
       const birthday = parseBirthday(initialCharacter.birthday);
       setBirthdayMonth(birthday.month);
       setBirthdayDay(birthday.day);
-      setBirthdayWeekday(birthday.weekday);
       setBloodStatus(initialCharacter.bloodStatus);
       setWandWood(initialCharacter.wand.wood);
       setWandCore(initialCharacter.wand.core);
@@ -115,7 +113,6 @@ export const CharacterModal: React.FC<CharacterModalProps> = ({
       setYear(1);
       setBirthdayMonth(1);
       setBirthdayDay(1);
-      setBirthdayWeekday('');
       setBloodStatus('혼혈');
       setWandWood('주목');
       setWandCore('용의 심근');
@@ -187,7 +184,7 @@ export const CharacterModal: React.FC<CharacterModalProps> = ({
       height: Number(height) > 0 ? Number(height) : undefined,
       weight: Number(weight) > 0 ? Number(weight) : undefined,
       year,
-      birthday: `${birthdayMonth}월 ${birthdayDay}일${birthdayWeekday ? ` (${birthdayWeekday})` : ''}`,
+      birthday: `${birthdayMonth}월 ${birthdayDay}일`,
       bloodStatus,
       wand: {
         wood: wandWood.trim(),
@@ -432,7 +429,7 @@ export const CharacterModal: React.FC<CharacterModalProps> = ({
                   <div>
                     <fieldset>
                       <legend className="block text-xs text-[#a19d94] mb-1">생일</legend>
-                      <div className="grid grid-cols-3 gap-2">
+                      <div className="grid grid-cols-2 gap-2">
                         <label className="text-xs text-[#a19d94]">월
                           <select aria-label="생일 월" value={birthdayMonth} onChange={e => { const month = Number(e.target.value); setBirthdayMonth(month); setBirthdayDay(day => Math.min(day, birthdayDays(month))); }} className="w-full mt-1 px-2 py-2 bg-[#0c121e] border border-[#d4a33e]/25 rounded-lg text-xs text-[#e8e4dc]">
                             {Array.from({ length: 12 }, (_, i) => <option key={i + 1} value={i + 1}>{i + 1}월</option>)}
@@ -441,12 +438,6 @@ export const CharacterModal: React.FC<CharacterModalProps> = ({
                         <label className="text-xs text-[#a19d94]">일
                           <select aria-label="생일 일" value={birthdayDay} onChange={e => setBirthdayDay(Number(e.target.value))} className="w-full mt-1 px-2 py-2 bg-[#0c121e] border border-[#d4a33e]/25 rounded-lg text-xs text-[#e8e4dc]">
                             {Array.from({ length: birthdayDays(birthdayMonth) }, (_, i) => <option key={i + 1} value={i + 1}>{i + 1}일</option>)}
-                          </select>
-                        </label>
-                        <label className="text-xs text-[#a19d94]">요일
-                          <select aria-label="생일 요일" value={birthdayWeekday} onChange={e => setBirthdayWeekday(e.target.value)} className="w-full mt-1 px-2 py-2 bg-[#0c121e] border border-[#d4a33e]/25 rounded-lg text-xs text-[#e8e4dc]">
-                            <option value="">미선택</option>
-                            {WEEKDAYS.map(day => <option key={day} value={day}>{day}</option>)}
                           </select>
                         </label>
                       </div>
