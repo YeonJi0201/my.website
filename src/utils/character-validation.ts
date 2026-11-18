@@ -31,6 +31,7 @@ export function characterErrors(value: unknown): string[] {
   for (const [key, label] of [['wood', '목재'], ['core', '심'], ['length', '길이'], ['flexibility', '유연함']] as const) {
     if (!c.wand || typeof c.wand[key] !== 'string' || c.wand[key].length > 1000) errors.push(`지팡이 ${label}: 1,000자 이하의 올바른 값을 입력해주세요.`);
   }
+  if (c.catchphrase !== undefined && (typeof c.catchphrase !== 'string' || c.catchphrase.length > 120)) errors.push('캐치프레이즈: 120자 이하로 입력해주세요.');
   if (c.positionOrClub !== undefined && (typeof c.positionOrClub !== 'string' || c.positionOrClub.length > 1000)) errors.push('동아리 / 직책: 1,000자 이하로 입력해주세요.');
   const storageImage = (image: string) => /^https:\/\/[a-z0-9.-]+(?::\d+)?\/storage\/v1\/object\/public\/character-images\/[\w/-]+\.(png|jpg|webp)$/.test(image);
   if (typeof c.image !== 'string' || !(/^(\/src\/assets\/images\/|\/assets\/)[\w.-]+$/.test(c.image) || /^data:image\/(png|jpeg|webp);base64,[A-Za-z0-9+/=]+$/.test(c.image) || storageImage(c.image))) errors.push('캐릭터 이미지: PNG 파일을 선택해주세요. 잘못된 파일 형식 또는 이미지 주소입니다.');

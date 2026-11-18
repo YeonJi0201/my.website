@@ -65,6 +65,7 @@ export const CharacterModal: React.FC<CharacterModalProps> = ({
   const [background, setBackground] = useState('');
   const [quote, setQuote] = useState('');
   const [positionOrClub, setPositionOrClub] = useState('');
+  const [catchphrase, setCatchphrase] = useState('');
   const [triviaInput, setTriviaInput] = useState('');
 
   const fileInputRef = useRef<HTMLInputElement | null>(null);
@@ -99,6 +100,7 @@ export const CharacterModal: React.FC<CharacterModalProps> = ({
       setBackground(initialCharacter.background);
       setQuote(initialCharacter.quote);
       setPositionOrClub(initialCharacter.positionOrClub || '');
+      setCatchphrase(initialCharacter.catchphrase || '');
       setTriviaInput((initialCharacter.trivia || []).join('\n'));
     } else {
       // 신규 등록용 기본값
@@ -127,6 +129,7 @@ export const CharacterModal: React.FC<CharacterModalProps> = ({
       setBackground('');
       setQuote('');
       setPositionOrClub('');
+      setCatchphrase('');
       setTriviaInput('');
     }
   }, [initialCharacter, defaultHouse, isOpen]);
@@ -203,6 +206,7 @@ export const CharacterModal: React.FC<CharacterModalProps> = ({
       background: background.trim(),
       quote: quote.trim() || '"우리는 마법으로 연결되어 있어."',
       positionOrClub: positionOrClub.trim(),
+      catchphrase: catchphrase.trim(),
       trivia: triviaArray,
       createdAt: initialCharacter ? initialCharacter.createdAt : Date.now(),
     };
@@ -450,6 +454,17 @@ export const CharacterModal: React.FC<CharacterModalProps> = ({
                       value={positionOrClub}
                       onChange={(e) => setPositionOrClub(e.target.value)}
                       placeholder="예: 그리핀도르 퀴디치 추격꾼, 슬러그 클럽"
+                      className="w-full px-3 py-2 bg-[#0c121e] border border-[#d4a33e]/25 rounded-lg text-xs text-[#e8e4dc] focus:outline-none focus:border-[#d4a33e]"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-xs text-[#a19d94] mb-1">캐치프레이즈 <span className="opacity-60">(프로필 성격 영역 제목 · 비우면 '그 마음의 결')</span></label>
+                    <input
+                      type="text"
+                      value={catchphrase}
+                      maxLength={120}
+                      onChange={(e) => setCatchphrase(e.target.value)}
+                      placeholder="예: 불꽃은 꺼져도 온기는 남는다"
                       className="w-full px-3 py-2 bg-[#0c121e] border border-[#d4a33e]/25 rounded-lg text-xs text-[#e8e4dc] focus:outline-none focus:border-[#d4a33e]"
                     />
                   </div>

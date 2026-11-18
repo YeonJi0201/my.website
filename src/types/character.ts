@@ -32,6 +32,7 @@ export interface Character {
   personalityDetail: string;
   background: string;
   quote: string;
+  catchphrase?: string; // 프로필 성격 영역 제목. 비어 있으면 '그 마음의 결'
   positionOrClub?: string;
   trivia: string[];
   createdAt: number;

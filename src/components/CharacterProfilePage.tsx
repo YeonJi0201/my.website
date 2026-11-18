@@ -52,7 +52,7 @@ export const CharacterProfilePage: React.FC<CharacterProfilePageProps> = ({ char
           </button>
         </motion.div>
         <motion.aside key={`personality-${character.id}`} className="profile-personality" initial={{ opacity: 0, y: 15 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: reducedMotion ? 0 : .7, delay: reducedMotion ? 0 : .1 }}>
-          <h2>그 마음의 결</h2>
+          <h2>{character.catchphrase?.trim() || '그 마음의 결'}</h2>
           <p className="personality-keywords">{character.personality.join(' · ')}</p>
           <p className="personality-prose">{character.personalityDetail || '아직 기록되지 않은 이야기입니다.'}</p>
           <blockquote>{character.quote}</blockquote>
