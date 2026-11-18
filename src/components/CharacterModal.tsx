@@ -56,8 +56,6 @@ export const CharacterModal: React.FC<CharacterModalProps> = ({
   const [image, setImage] = useState('');
   const [portraitCrop, setPortraitCrop] = useState({ zoom: 1, x: 0, y: 0 });
 
-  const [appearanceSummary, setAppearanceSummary] = useState('');
-  const [appearanceDetail, setAppearanceDetail] = useState('');
 
   const [personalityInput, setPersonalityInput] = useState('용기, 정의로움, 온화함');
   const [personalityDetail, setPersonalityDetail] = useState('');
@@ -93,8 +91,6 @@ export const CharacterModal: React.FC<CharacterModalProps> = ({
       setWandFlex(initialCharacter.wand.flexibility);
       setImage(initialCharacter.image);
       setPortraitCrop(initialCharacter.portraitCrop || { zoom: 1, x: 0, y: 0 });
-      setAppearanceSummary(initialCharacter.appearanceSummary);
-      setAppearanceDetail(initialCharacter.appearanceDetail);
       setPersonalityInput(initialCharacter.personality.join(', '));
       setPersonalityDetail(initialCharacter.personalityDetail);
       setBackground(initialCharacter.background);
@@ -122,8 +118,6 @@ export const CharacterModal: React.FC<CharacterModalProps> = ({
       setWandFlex('단단함');
       setImage('/src/assets/images/portrait_gryffindor_oc_1791347670977.jpg');
       setPortraitCrop({ zoom: 1, x: 0, y: 0 });
-      setAppearanceSummary('');
-      setAppearanceDetail('');
       setPersonalityInput('용맹함, 따뜻한 마음, 직관적');
       setPersonalityDetail('');
       setBackground('');
@@ -199,8 +193,6 @@ export const CharacterModal: React.FC<CharacterModalProps> = ({
       imageOriginal: image === initialCharacter?.image ? initialCharacter.imageOriginal : undefined,
       imageThumbnail: image === initialCharacter?.image ? initialCharacter.imageThumbnail : undefined,
       image: image || '/src/assets/images/portrait_gryffindor_oc_1791347670977.jpg',
-      appearanceSummary: appearanceSummary.trim(),
-      appearanceDetail: appearanceDetail.trim(),
       personality: personalityArray.length > 0 ? personalityArray : ['신비로움'],
       personalityDetail: personalityDetail.trim(),
       background: background.trim(),
@@ -540,30 +532,6 @@ export const CharacterModal: React.FC<CharacterModalProps> = ({
                 placeholder='예: "도망치지 마. 어둠이 짙을수록 우리가 밝혀야 할 루모스는 더 찬란해야 하니까."'
                 className="w-full px-3 py-2 bg-[#0c121e] border border-[#d4a33e]/25 rounded-lg text-xs text-[#e8e4dc]"
               />
-            </div>
-
-            {/* 외관 요약과 상세 묘사 */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-              <div>
-                <label className="block text-xs text-[#a19d94] mb-1">외관 요약 (한 줄 묘사)</label>
-                <input
-                  type="text"
-                  value={appearanceSummary}
-                  onChange={(e) => setAppearanceSummary(e.target.value)}
-                  placeholder="예: 붉은빛이 감도는 갈색 머리와 금빛 눈동자, 당당하고 곧은 자세."
-                  className="w-full px-3 py-2 bg-[#0c121e] border border-[#d4a33e]/25 rounded-lg text-xs text-[#e8e4dc]"
-                />
-              </div>
-              <div>
-                <label className="block text-xs text-[#a19d94] mb-1">외관 상세 묘사 (키, 체형, 특징)</label>
-                <textarea
-                  rows={2}
-                  value={appearanceDetail}
-                  onChange={(e) => setAppearanceDetail(e.target.value)}
-                  placeholder="예: 168cm의 늘씬한 체격. 망토 깃을 살짝 세워 입는 버릇..."
-                  className="w-full px-3 py-2 bg-[#0c121e] border border-[#d4a33e]/25 rounded-lg text-xs text-[#e8e4dc] resize-none"
-                />
-              </div>
             </div>
 
             {/* 성격 키워드와 상세 서술 */}

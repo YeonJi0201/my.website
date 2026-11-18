@@ -71,7 +71,7 @@ export const CharacterProfilePage: React.FC<CharacterProfilePageProps> = ({ char
             <dt>유연함</dt><dd>{character.wand.flexibility}</dd>
           </dl>
         </article>
-        <article><h3>지나온 이야기</h3><p>{character.background || '아직 기록되지 않았습니다.'}</p><h3>외형</h3><p>{character.appearanceDetail}</p></article>
+        <article><h3>지나온 이야기</h3><p>{character.background || '아직 기록되지 않았습니다.'}</p></article>
         <article><h3>작은 비밀들</h3><ul>{character.trivia.map((item, i) => <li key={i}>{item}</li>)}</ul></article>
       </div>
     </section>

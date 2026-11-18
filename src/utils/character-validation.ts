@@ -6,7 +6,7 @@ export function characterErrors(value: unknown): string[] {
   if (!value || typeof value !== 'object' || Array.isArray(value)) return ['캐릭터 데이터 형식이 올바르지 않습니다.'];
   const c = value as Character;
   const errors: string[] = [];
-  const fields = { id: '캐릭터 ID', nameKo: '한글 이름', nameEn: '영문 이름', gender: '성별', birthday: '생일', appearanceSummary: '외관 요약', appearanceDetail: '외관 상세', personalityDetail: '성격 상세', background: '배경 이야기', quote: '대표 대사' } as const;
+  const fields = { id: '캐릭터 ID', nameKo: '한글 이름', nameEn: '영문 이름', gender: '성별', birthday: '생일', personalityDetail: '성격 상세', background: '배경 이야기', quote: '대표 대사' } as const;
   for (const [key, label] of Object.entries(fields)) {
     const field = c[key as keyof typeof fields];
     if (typeof field !== 'string') errors.push(`${label}: 문자열로 입력해주세요.`);

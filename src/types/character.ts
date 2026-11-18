@@ -26,8 +26,10 @@ export interface Character {
   image: string; // Optimized profile URL, legacy asset path or upload data URL
   imageOriginal?: string;
   imageThumbnail?: string;
-  appearanceSummary: string;
-  appearanceDetail: string;
+  /** @deprecated 외형 항목은 사용자 요청으로 삭제. 예전 기록 호환용으로만 남는다. */
+  appearanceSummary?: string;
+  /** @deprecated */
+  appearanceDetail?: string;
   personality: string[];
   personalityDetail: string;
   background: string;
